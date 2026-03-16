@@ -1,0 +1,10 @@
+**/.svn/*
+.DS_Store
+
+CMS_CMS_PSP_APP_*/
+CMS_PSP_BACK_APP_*/
+node_modules/
+dist/
+.cursor/
+.agents/
+references/
