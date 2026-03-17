@@ -74,6 +74,9 @@ export function DualGrid({
     onRowClick: handleRowClick,
     onRowDoubleClick: handleDoubleClick,
     getRowClassName,
+    componentsProps: {
+      row: { style: { cursor: 'pointer' } },
+    },
   };
 
   const contentMinHeight = rows.length * rowHeight;

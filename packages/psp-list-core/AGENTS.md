@@ -26,6 +26,10 @@ The keydown handler does three things synchronously before React renders:
 
 The browser paints steps 1+2 immediately after the handler returns. React renders step 3 in the background. Without `startTransition`, React's synchronous render (~60ms) blocks the main thread, preventing the browser from painting the DOM changes from steps 1+2 — making them invisible.
 
+## DataGrid row styling
+
+Prefer **`componentsProps.row`** over `sx` with `.MuiDataGrid-row` for row-level styles (e.g. cursor). GridRow receives slot props and merges them onto the root div; no internal class names. Example: `componentsProps: { row: { style: { cursor: 'pointer' } } }`. MUI docs: [Styling](https://mui.com/x/react-data-grid/style/), [Custom slots](https://mui.com/x/react-data-grid/components/) (slotProps.row / componentsProps.row).
+
 ## Debugging approach: Perf Lab isolation
 
 When diagnosing perf, don't instrument the full component. Build up from scratch:
@@ -48,6 +52,7 @@ This isolated the exact cost of each layer and proved the fix needed to target r
 - **DOM highlight without `startTransition`** — Browser can't paint while React's synchronous render blocks main thread. The DOM changes are invisible until render completes (~60ms), so `highlightRowVisually` alone is a no-op.
 - **Assuming React render skips rows** — Logs proved every index was rendered and painted. The "skipping" was uneven frame cadence (78% jank in L3), not missing indices. Always verify with runtime data before fixing.
 - **Guessing CSS selectors** — MUI DataGridPro v5 uses `.MuiDataGrid-row[data-rowindex="N"]` and `.Mui-selected`. Verify with `querySelectorAll` counts; zero matches = wrong selector or wrong container ref.
+- **Styling rows via `sx` and `.MuiDataGrid-row`** — Fragile (internal class). Use `componentsProps.row` for row props/style instead.
 
 ## Perf Lab
 
