@@ -1,18 +1,19 @@
 import React from 'react';
 import { render, screen, fireEvent } from '@testing-library/react';
+import { vi } from 'vitest';
 import { PrintDialog } from '../../src/components/PrintDialog';
 import type { PrintVariant } from '../../src/components/PrintDialog';
 
 describe('PrintDialog', () => {
-  const onClose = jest.fn();
-  const onPrint = jest.fn();
+  const onClose = vi.fn();
+  const onPrint = vi.fn();
   const variants: PrintVariant[] = [
     { label: 'English', value: 'en' },
     { label: 'Chinese', value: 'zh' },
   ];
 
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   it('should render with title and variants when open', () => {

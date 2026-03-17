@@ -1,4 +1,5 @@
 import { renderHook, act } from '@testing-library/react';
+import { vi } from 'vitest';
 import { usePatientSelection } from '../../src/hooks/usePatientSelection';
 import type { BasePatientRecord } from '../../src/types/patient-record';
 
@@ -9,10 +10,10 @@ const rows: BasePatientRecord[] = [
 ];
 
 describe('usePatientSelection', () => {
-  const onPatientSelect = jest.fn();
+  const onPatientSelect = vi.fn();
 
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   it('should initialize with no selection', () => {

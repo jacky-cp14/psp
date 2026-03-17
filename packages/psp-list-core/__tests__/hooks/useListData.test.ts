@@ -1,6 +1,7 @@
 import { renderHook, waitFor } from '@testing-library/react';
 import React from 'react';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
+import { vi, type Mock } from 'vitest';
 import { useListData } from '../../src/hooks/useListData';
 import type { BasePatientRecord } from '../../src/types/patient-record';
 
@@ -20,11 +21,11 @@ const mockRecords: BasePatientRecord[] = [
 
 describe('useListData', () => {
   beforeEach(() => {
-    jest.restoreAllMocks();
+    vi.restoreAllMocks();
   });
 
   it('should return empty rows initially when loading', () => {
-    global.fetch = jest.fn().mockResolvedValue({
+    global.fetch = vi.fn().mockResolvedValue({
       ok: true,
       json: () => Promise.resolve({ patList: mockRecords }),
     });
@@ -44,7 +45,7 @@ describe('useListData', () => {
   });
 
   it('should fetch and return rows on success', async () => {
-    global.fetch = jest.fn().mockResolvedValue({
+    global.fetch = vi.fn().mockResolvedValue({
       ok: true,
       json: () => Promise.resolve({ patList: mockRecords }),
     });
@@ -69,7 +70,7 @@ describe('useListData', () => {
   });
 
   it('should return error on fetch failure', async () => {
-    global.fetch = jest.fn().mockResolvedValue({
+    global.fetch = vi.fn().mockResolvedValue({
       ok: false,
       status: 500,
       statusText: 'Internal Server Error',
@@ -94,7 +95,7 @@ describe('useListData', () => {
   });
 
   it('should return empty rows when dataRoot is missing in response', async () => {
-    global.fetch = jest.fn().mockResolvedValue({
+    global.fetch = vi.fn().mockResolvedValue({
       ok: true,
       json: () => Promise.resolve({ otherKey: [] }),
     });
@@ -118,7 +119,7 @@ describe('useListData', () => {
   });
 
   it('should not fetch when enabled is false', async () => {
-    global.fetch = jest.fn();
+    global.fetch = vi.fn();
 
     const { result } = renderHook(
       () =>
@@ -137,7 +138,7 @@ describe('useListData', () => {
   });
 
   it('should pass params as query string', async () => {
-    global.fetch = jest.fn().mockResolvedValue({
+    global.fetch = vi.fn().mockResolvedValue({
       ok: true,
       json: () => Promise.resolve({ patList: [] }),
     });
@@ -156,7 +157,7 @@ describe('useListData', () => {
       expect(global.fetch).toHaveBeenCalled();
     });
 
-    const calledUrl = (global.fetch as jest.Mock).mock.calls[0][0] as string;
+    const calledUrl = (global.fetch as Mock).mock.calls[0][0] as string;
     expect(calledUrl).toContain('ward=A01');
     expect(calledUrl).toContain('hosp=QMH');
   });

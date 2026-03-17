@@ -1,6 +1,7 @@
 import React from 'react';
 import { render, screen } from '@testing-library/react';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
+import { vi } from 'vitest';
 import type { PatientRecord } from '../../../src/types/patient-record';
 import { List0Normal } from '../../lists/list0-normal';
 import { List1Uncoded } from '../../lists/list1-uncoded';
@@ -30,14 +31,14 @@ const noop = (_p: PatientRecord) => {};
 const defaultParams = { hospCode: 'QMH', wardCode: 'WARD_A' };
 
 beforeEach(() => {
-  global.fetch = jest.fn().mockResolvedValue({
+  global.fetch = vi.fn().mockResolvedValue({
     ok: true,
     json: () => Promise.resolve({}),
   });
 });
 
 afterEach(() => {
-  jest.restoreAllMocks();
+  vi.restoreAllMocks();
 });
 
 describe('Demo Lists Integration', () => {

@@ -1,4 +1,5 @@
 import { renderHook } from '@testing-library/react';
+import { vi } from 'vitest';
 import { useKeyboardNavigation } from '../../src/hooks/useKeyboardNavigation';
 
 function createMockRef(overrides: Partial<HTMLDivElement> = {}) {
@@ -6,7 +7,7 @@ function createMockRef(overrides: Partial<HTMLDivElement> = {}) {
     current: {
       scrollTop: 0,
       clientHeight: 400,
-      querySelectorAll: jest.fn().mockReturnValue([]),
+      querySelectorAll: vi.fn().mockReturnValue([]),
       ...overrides,
     } as unknown as HTMLDivElement,
   };
@@ -17,17 +18,17 @@ function fireKey(
   key: string,
 ) {
   const event = new KeyboardEvent('keydown', { key, bubbles: true });
-  Object.defineProperty(event, 'preventDefault', { value: jest.fn() });
+  Object.defineProperty(event, 'preventDefault', { value: vi.fn() });
   handleKeyDown(event);
   return event;
 }
 
 describe('useKeyboardNavigation', () => {
-  const onSelectionChange = jest.fn();
-  const onSubmit = jest.fn();
+  const onSelectionChange = vi.fn();
+  const onSubmit = vi.fn();
 
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   it('should move selection down on ArrowDown', () => {
