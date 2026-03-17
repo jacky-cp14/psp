@@ -6,8 +6,9 @@ function createMockRef(overrides: Partial<HTMLDivElement> = {}) {
     current: {
       scrollTop: 0,
       clientHeight: 400,
+      querySelectorAll: jest.fn().mockReturnValue([]),
       ...overrides,
-    } as HTMLDivElement,
+    } as unknown as HTMLDivElement,
   };
 }
 
