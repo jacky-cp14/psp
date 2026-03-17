@@ -54,14 +54,14 @@ function generateBaseRows(): NormalPatientRecord[] {
     rows.push({
       id: String(i),
       wardCode: ward,
-      wardCodeDisp: ward,
       bed,
-      bedNoDisp: bed,
       name: `${FAMILY_NAMES[fi]} ${GIVEN_NAMES[gi]}`,
-      chineseNameDisp: CHI_NAMES[ci],
+      chineseName: CHI_NAMES[ci],
       caseNo: `EP${pad(i, 6)}`,
       specCode: SPECS[si],
       admissionDtm,
+      sex,
+      age,
       sexAge: `${sex}/${age}`,
       sourceCode: SOURCES[sri],
       hkid: `${String.fromCharCode(65 + (i % 26))}${pad(123456 + i, 6)}(${(i % 10)})`,
@@ -78,25 +78,25 @@ const baseRows = generateBaseRows();
 
 export const cpiPatList: NormalPatientRecord[] = baseRows;
 
-export const cpiUnCodePatList: UncodedPatientRecord[] = baseRows.map((r, i) => ({
+const cpiUnCodePatList: UncodedPatientRecord[] = baseRows.map((r, i) => ({
   ...r,
   dischargeDtm: i % 3 === 0 ? `15-Jan-2024 10:00` : undefined,
 }));
 
-export const moPatList: MoInChargePatientRecord[] = baseRows.map((r, i) => ({
+const moPatList: MoInChargePatientRecord[] = baseRows.map((r, i) => ({
   ...r,
   moic: MO_NAMES[i % MO_NAMES.length],
 }));
 
-export const cpiAbsPatList: NormalPatientRecord[] = baseRows;
+const cpiAbsPatList: NormalPatientRecord[] = baseRows;
 
-export const cpiUserGrpPatList: NormalPatientRecord[] = baseRows;
+const cpiUserGrpPatList: NormalPatientRecord[] = baseRows;
 
-export const cpiActiveMoPatList: NormalPatientRecord[] = baseRows;
+const cpiActiveMoPatList: NormalPatientRecord[] = baseRows;
 
-export const cpiActiveTeamPatList: ActiveTeamPatientRecord[] = baseRows.map((r, i) => ({
+const cpiActiveTeamPatList: ActiveTeamPatientRecord[] = baseRows.map((r, i) => ({
   ...r,
-  wardCode2Disp: r.wardCodeDisp,
+  wardCode2Disp: r.wardCode,
   teamCode: TEAMS[i % TEAMS.length],
   specIC: MO_NAMES[i % MO_NAMES.length],
 }));
@@ -121,7 +121,9 @@ function generateGopcRows(): GopcPatientRecord[] {
     rows.push({
       id: `g${i}`,
       name: `${FAMILY_NAMES[fi]} ${GIVEN_NAMES[gi]}`,
-      chineseNameDisp: CHI_NAMES[ci],
+      chineseName: CHI_NAMES[ci],
+      sex,
+      age,
       slotDatetime,
       priority: priorities[i % 3],
       priorityValue: (i % 3) + 1,
@@ -143,11 +145,11 @@ function generateGopcRows(): GopcPatientRecord[] {
 
 const gopcBase = generateGopcRows();
 
-export const msGopcPatList: GopcPatientRecord[] = gopcBase;
+const msGopcPatList: GopcPatientRecord[] = gopcBase;
 
-export const gopcPatList: GopcPatientRecord[] = gopcBase;
+const gopcPatList: GopcPatientRecord[] = gopcBase;
 
-export const opPatList: OpPatientRecord[] = gopcBase.map((r, i) => ({
+const opPatList: OpPatientRecord[] = gopcBase.map((r, i) => ({
   ...r,
   type: i % 2 === 0 ? 'New' : 'FU',
   prIndicator: i % 5 === 0 ? 'Y' : 'N',

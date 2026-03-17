@@ -7,9 +7,9 @@ import { activeTeamSortOptions } from '../../src/utils/sort-comparators';
 
 const leftColumns: GridColDef[] = [
   { field: 'wardCode2Disp', headerName: 'Ward', width: 65 },
-  { field: 'bedNoDisp', headerName: 'Bed', width: 100 },
+  { field: 'bed', headerName: 'Bed', width: 100 },
   { field: 'name', headerName: 'English Name', flex: 1, minWidth: 200 },
-  { field: 'chineseNameDisp', headerName: 'Chinese Name', width: 160 },
+  { field: 'chineseName', headerName: 'Chinese Name', width: 160 },
   { field: 'sexAge', headerName: 'Sex/Age', width: 90 },
   { field: 'hkid', headerName: 'HKID', width: 140 },
 ];
@@ -27,10 +27,10 @@ const config: PspListConfig<ActiveTeamPatientRecord> = {
   servletUrl: 'activeteamservlet',
   dataRoot: 'cpiActiveTeamPatList',
   sortOptions: activeTeamSortOptions,
-  defaultSortIndex: 0,
+  defaultSortIndex: 8,
 };
 
-export interface List9Props {
+interface List9Props {
   params: Record<string, string>;
   onPatientSelect: (patient: ActiveTeamPatientRecord) => void;
 }
@@ -41,8 +41,9 @@ export function List9ActiveTeam({ params, onPatientSelect }: List9Props): React.
       <PspList.SelectionPanel>
         <span>Active Patient by Team</span>
       </PspList.SelectionPanel>
-      <PspList.DualGrid leftColumns={leftColumns} rightColumns={rightColumns} />
-      <PspList.SortMenu sortLabels={activeTeamSortOptions.map((s) => s.label)} />
+      <PspList.SortMenu sortLabels={activeTeamSortOptions.map((s) => s.label)}>
+        <PspList.DualGrid leftColumns={leftColumns} rightColumns={rightColumns} />
+      </PspList.SortMenu>
     </PspList>
   );
 }

@@ -1,9 +1,9 @@
-import React, { useRef, useCallback, startTransition } from 'react';
-import { DataGridPro } from '@mui/x-data-grid-pro';
-import type { GridColDef, GridRowParams } from '@mui/x-data-grid-pro';
-import { PanelGroup, Panel, PanelResizeHandle } from 'react-resizable-panels';
-import { usePspList } from '../context/PspListContext';
-import { useKeyboardNavigation } from '../hooks/useKeyboardNavigation';
+import React, { useRef, useCallback, startTransition } from "react";
+import { DataGridPro } from "@mui/x-data-grid-pro";
+import type { GridColDef, GridRowParams } from "@mui/x-data-grid-pro";
+import { PanelGroup, Panel, PanelResizeHandle } from "react-resizable-panels";
+import { usePspList } from "../context/PspListContext";
+import { useKeyboardNavigation } from "../hooks/useKeyboardNavigation";
 
 export interface DualGridProps {
   leftColumns: GridColDef[];
@@ -31,9 +31,10 @@ export function DualGrid({
   const { rows, selectedRowId, setSelectedRowId } = usePspList();
   const scrollContainerRef = useRef<HTMLDivElement>(null);
 
-  const selectedIndex = selectedRowId !== null
-    ? rows.findIndex((r) => r.id === String(selectedRowId))
-    : -1;
+  const selectedIndex =
+    selectedRowId !== null
+      ? rows.findIndex((r) => r.id === String(selectedRowId))
+      : -1;
 
   const { handleKeyDown } = useKeyboardNavigation({
     rowCount: rows.length,
@@ -70,12 +71,12 @@ export function DualGrid({
     disableColumnFilter: true,
     disableColumnSelector: true,
     sortModel: [] as [],
-    rowSelectionModel: selectionModel,
+    selectionModel,
     onRowClick: handleRowClick,
     onRowDoubleClick: handleDoubleClick,
     getRowClassName,
     componentsProps: {
-      row: { style: { cursor: 'pointer' } },
+      row: { style: { cursor: "pointer" } },
     },
   };
 
@@ -83,12 +84,17 @@ export function DualGrid({
 
   return (
     <div
-      style={{ flex: 1, minHeight: 0, display: 'flex', flexDirection: 'column' }}
+      style={{
+        flex: 1,
+        minHeight: 0,
+        display: "flex",
+        flexDirection: "column",
+      }}
       data-testid="dual-grid-wrapper"
     >
       <div
         ref={scrollContainerRef}
-        style={{ overflowY: 'auto', flex: 1, minHeight: 0, outline: 'none' }}
+        style={{ overflowY: "auto", flex: 1, minHeight: 0, outline: "none" }}
         tabIndex={0}
         onKeyDown={handleKeyDown}
         data-testid="dual-grid-container"
@@ -105,8 +111,8 @@ export function DualGrid({
             <PanelResizeHandle
               style={{
                 width: 4,
-                backgroundColor: '#e0e0e0',
-                cursor: 'col-resize',
+                backgroundColor: "#e0e0e0",
+                cursor: "col-resize",
               }}
             />
             <Panel>

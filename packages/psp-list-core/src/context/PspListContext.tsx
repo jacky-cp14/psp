@@ -36,7 +36,7 @@ export interface PspListContextValue {
 
 const PspListContext = createContext<PspListContextValue | null>(null);
 
-export interface PspListProviderProps {
+interface PspListProviderProps {
   value: PspListContextValue;
   children: React.ReactNode;
 }

@@ -6,10 +6,10 @@ import type { NormalPatientRecord } from '../../src/types/patient-record';
 import { activeMoSortOptions } from '../../src/utils/sort-comparators';
 
 const leftColumns: GridColDef[] = [
-  { field: 'wardCodeDisp', headerName: 'Ward', width: 65 },
-  { field: 'bedNoDisp', headerName: 'Bed', width: 100 },
+  { field: 'wardCode', headerName: 'Ward', width: 65 },
+  { field: 'bed', headerName: 'Bed', width: 100 },
   { field: 'name', headerName: 'English Name', flex: 1, minWidth: 200 },
-  { field: 'chineseNameDisp', headerName: 'Chinese Name', width: 160 },
+  { field: 'chineseName', headerName: 'Chinese Name', width: 160 },
 ];
 
 const rightColumns: GridColDef[] = [
@@ -25,10 +25,10 @@ const config: PspListConfig<NormalPatientRecord> = {
   servletUrl: 'activemoservlet',
   dataRoot: 'cpiActiveMoPatList',
   sortOptions: activeMoSortOptions,
-  defaultSortIndex: 0,
+  defaultSortIndex: 8,
 };
 
-export interface List8Props {
+interface List8Props {
   params: Record<string, string>;
   onPatientSelect: (patient: NormalPatientRecord) => void;
 }
@@ -39,8 +39,9 @@ export function List8ActiveMo({ params, onPatientSelect }: List8Props): React.Re
       <PspList.SelectionPanel>
         <span>Active Patient by MO/Specialist</span>
       </PspList.SelectionPanel>
-      <PspList.DualGrid leftColumns={leftColumns} rightColumns={rightColumns} />
-      <PspList.SortMenu sortLabels={activeMoSortOptions.map((s) => s.label)} />
+      <PspList.SortMenu sortLabels={activeMoSortOptions.map((s) => s.label)}>
+        <PspList.DualGrid leftColumns={leftColumns} rightColumns={rightColumns} />
+      </PspList.SortMenu>
     </PspList>
   );
 }

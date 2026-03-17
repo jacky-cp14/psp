@@ -11,8 +11,8 @@ const ROW_HEIGHT = 28;
 const ROWS = cpiPatList;
 
 const allCols: GridColDef[] = [
-  { field: 'wardCodeDisp', headerName: 'Ward', width: 65 },
-  { field: 'bedNoDisp', headerName: 'Bed', width: 100 },
+  { field: 'wardCode', headerName: 'Ward', width: 65 },
+  { field: 'bed', headerName: 'Bed', width: 100 },
   { field: 'name', headerName: 'Name', flex: 1, minWidth: 200 },
   { field: 'caseNo', headerName: 'Episode', width: 152 },
   { field: 'specCode', headerName: 'Spec', width: 62 },
@@ -20,8 +20,8 @@ const allCols: GridColDef[] = [
 ];
 
 const leftCols: GridColDef[] = [
-  { field: 'wardCodeDisp', headerName: 'Ward', width: 65 },
-  { field: 'bedNoDisp', headerName: 'Bed', width: 100 },
+  { field: 'wardCode', headerName: 'Ward', width: 65 },
+  { field: 'bed', headerName: 'Bed', width: 100 },
   { field: 'name', headerName: 'Name', flex: 1, minWidth: 200 },
 ];
 
@@ -104,7 +104,7 @@ function Layer2(): React.ReactElement {
         disableColumnFilter
         disableColumnSelector
         sortModel={[] as []}
-        rowSelectionModel={selectedId ? [selectedId] : []}
+        selectionModel={selectedId ? [selectedId] : []}
         onRowClick={(params: GridRowParams) => startTransition(() => setSelectedId(String(params.id)))}
       />
     </div>
@@ -143,7 +143,7 @@ function Layer3(): React.ReactElement {
     disableColumnFilter: true,
     disableColumnSelector: true,
     sortModel: [] as [],
-    rowSelectionModel: selectionModel,
+    selectionModel,
     onRowClick: (params: GridRowParams) => startTransition(() => setSelectedId(String(params.id))),
   };
 
@@ -158,12 +158,16 @@ function Layer3(): React.ReactElement {
     >
       <div style={{ minHeight: contentHeight }}>
         <PanelGroup direction="horizontal">
-          <Panel defaultSize={35}>
-            <DataGridPro {...sharedProps} columns={leftCols} />
+          <Panel defaultSize={35} style={{ minWidth: 0 }}>
+            <div style={{ minWidth: 0, overflowX: 'auto', width: '100%', height: '100%' }}>
+              <DataGridPro {...sharedProps} columns={leftCols} />
+            </div>
           </Panel>
           <PanelResizeHandle style={{ width: 4, backgroundColor: '#e0e0e0', cursor: 'col-resize' }} />
-          <Panel>
-            <DataGridPro {...sharedProps} columns={rightCols} />
+          <Panel style={{ minWidth: 0 }}>
+            <div style={{ minWidth: 0, overflowX: 'auto', width: '100%', height: '100%' }}>
+              <DataGridPro {...sharedProps} columns={rightCols} />
+            </div>
           </Panel>
         </PanelGroup>
       </div>
@@ -182,7 +186,7 @@ function Layer4({ onPatientSelect }: { onPatientSelect: (p: NormalPatientRecord)
 }
 
 /* ─── PerfLab: Tab switcher across layers ─── */
-export interface PerfLabProps {
+interface PerfLabProps {
   params: Record<string, string>;
   onPatientSelect: (patient: NormalPatientRecord) => void;
 }

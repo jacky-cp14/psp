@@ -6,9 +6,9 @@ import type { UncodedPatientRecord } from '../../src/types/patient-record';
 import { uncodedSortOptions } from '../../src/utils/sort-comparators';
 
 const leftColumns: GridColDef[] = [
-  { field: 'bedNoDisp', headerName: 'Bed', width: 100 },
+  { field: 'bed', headerName: 'Bed', width: 100 },
   { field: 'name', headerName: 'English Name', flex: 1, minWidth: 200 },
-  { field: 'chineseNameDisp', headerName: 'Chinese Name', width: 160 },
+  { field: 'chineseName', headerName: 'Chinese Name', width: 160 },
 ];
 
 const rightColumns: GridColDef[] = [
@@ -25,10 +25,10 @@ const config: PspListConfig<UncodedPatientRecord> = {
   servletUrl: 'uncodeservlet',
   dataRoot: 'cpiUnCodePatList',
   sortOptions: uncodedSortOptions,
-  defaultSortIndex: 0,
+  defaultSortIndex: 2,
 };
 
-export interface List1Props {
+interface List1Props {
   params: Record<string, string>;
   onPatientSelect: (patient: UncodedPatientRecord) => void;
 }
@@ -39,8 +39,9 @@ export function List1Uncoded({ params, onPatientSelect }: List1Props): React.Rea
       <PspList.SelectionPanel>
         <span>Uncoded Patient List</span>
       </PspList.SelectionPanel>
-      <PspList.DualGrid leftColumns={leftColumns} rightColumns={rightColumns} />
-      <PspList.SortMenu sortLabels={uncodedSortOptions.map((s) => s.label)} />
+      <PspList.SortMenu sortLabels={uncodedSortOptions.map((s) => s.label)}>
+        <PspList.DualGrid leftColumns={leftColumns} rightColumns={rightColumns} />
+      </PspList.SortMenu>
     </PspList>
   );
 }

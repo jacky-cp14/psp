@@ -8,7 +8,7 @@ import { opSortOptions } from '../../src/utils/sort-comparators';
 const leftColumns: GridColDef[] = [
   { field: 'slotDatetime', headerName: 'Slot Date/Time', width: 190 },
   { field: 'name', headerName: 'English Name', flex: 1, minWidth: 200 },
-  { field: 'chineseNameDisp', headerName: 'Chinese Name', width: 160 },
+  { field: 'chineseName', headerName: 'Chinese Name', width: 160 },
 ];
 
 const rightColumns: GridColDef[] = [
@@ -30,7 +30,7 @@ const config: PspListConfig<OpPatientRecord> = {
   selectionMode: 'hkidSearch',
 };
 
-export interface List4Props {
+interface List4Props {
   params: Record<string, string>;
   onPatientSelect: (patient: OpPatientRecord) => void;
 }
@@ -41,8 +41,9 @@ export function List4Op({ params, onPatientSelect }: List4Props): React.ReactEle
       <PspList.SelectionPanel>
         <span>OP Appointment List</span>
       </PspList.SelectionPanel>
-      <PspList.DualGrid leftColumns={leftColumns} rightColumns={rightColumns} />
-      <PspList.SortMenu sortLabels={opSortOptions.map((s) => s.label)} />
+      <PspList.SortMenu sortLabels={opSortOptions.map((s) => s.label)}>
+        <PspList.DualGrid leftColumns={leftColumns} rightColumns={rightColumns} />
+      </PspList.SortMenu>
     </PspList>
   );
 }

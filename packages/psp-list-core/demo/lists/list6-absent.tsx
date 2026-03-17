@@ -6,9 +6,9 @@ import type { NormalPatientRecord } from '../../src/types/patient-record';
 import { absentSortOptions } from '../../src/utils/sort-comparators';
 
 const leftColumns: GridColDef[] = [
-  { field: 'wardCodeDisp', headerName: 'Ward', width: 65 },
+  { field: 'wardCode', headerName: 'Ward', width: 65 },
   { field: 'name', headerName: 'English Name', flex: 1, minWidth: 200 },
-  { field: 'chineseNameDisp', headerName: 'Chinese Name', width: 160 },
+  { field: 'chineseName', headerName: 'Chinese Name', width: 160 },
 ];
 
 const rightColumns: GridColDef[] = [
@@ -28,7 +28,7 @@ const config: PspListConfig<NormalPatientRecord> = {
   defaultSortIndex: 0,
 };
 
-export interface List6Props {
+interface List6Props {
   params: Record<string, string>;
   onPatientSelect: (patient: NormalPatientRecord) => void;
 }
@@ -39,8 +39,9 @@ export function List6Absent({ params, onPatientSelect }: List6Props): React.Reac
       <PspList.SelectionPanel>
         <span>Absent Patient List</span>
       </PspList.SelectionPanel>
-      <PspList.DualGrid leftColumns={leftColumns} rightColumns={rightColumns} />
-      <PspList.SortMenu sortLabels={absentSortOptions.map((s) => s.label)} />
+      <PspList.SortMenu sortLabels={absentSortOptions.map((s) => s.label)}>
+        <PspList.DualGrid leftColumns={leftColumns} rightColumns={rightColumns} />
+      </PspList.SortMenu>
     </PspList>
   );
 }

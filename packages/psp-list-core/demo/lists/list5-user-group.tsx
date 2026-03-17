@@ -6,10 +6,10 @@ import type { BasePatientRecord } from '../../src/types/patient-record';
 import { userGroupSortOptions } from '../../src/utils/sort-comparators';
 
 const leftColumns: GridColDef[] = [
-  { field: 'wardCodeDisp', headerName: 'Ward', width: 65 },
-  { field: 'bedNoDisp', headerName: 'Bed', width: 100 },
+  { field: 'wardCode', headerName: 'Ward', width: 65 },
+  { field: 'bed', headerName: 'Bed', width: 100 },
   { field: 'name', headerName: 'English Name', flex: 1, minWidth: 200 },
-  { field: 'chineseNameDisp', headerName: 'Chinese Name', width: 160 },
+  { field: 'chineseName', headerName: 'Chinese Name', width: 160 },
 ];
 
 const rightColumns: GridColDef[] = [
@@ -25,10 +25,10 @@ const config: PspListConfig<BasePatientRecord> = {
   servletUrl: 'usergroupservlet',
   dataRoot: 'cpiUserGrpPatList',
   sortOptions: userGroupSortOptions,
-  defaultSortIndex: 0,
+  defaultSortIndex: 8,
 };
 
-export interface List5Props {
+interface List5Props {
   params: Record<string, string>;
   onPatientSelect: (patient: BasePatientRecord) => void;
 }
@@ -39,8 +39,9 @@ export function List5UserGroup({ params, onPatientSelect }: List5Props): React.R
       <PspList.SelectionPanel>
         <span>User Group List</span>
       </PspList.SelectionPanel>
-      <PspList.DualGrid leftColumns={leftColumns} rightColumns={rightColumns} />
-      <PspList.SortMenu sortLabels={userGroupSortOptions.map((s) => s.label)} />
+      <PspList.SortMenu sortLabels={userGroupSortOptions.map((s) => s.label)}>
+        <PspList.DualGrid leftColumns={leftColumns} rightColumns={rightColumns} />
+      </PspList.SortMenu>
     </PspList>
   );
 }

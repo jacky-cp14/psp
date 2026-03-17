@@ -8,7 +8,7 @@ import { moInChargeSortOptions } from '../../src/utils/sort-comparators';
 const leftColumns: GridColDef[] = [
   { field: 'bed', headerName: 'Bed', width: 100 },
   { field: 'name', headerName: 'English Name', flex: 1, minWidth: 200 },
-  { field: 'chineseNameDisp', headerName: 'Chinese Name', width: 160 },
+  { field: 'chineseName', headerName: 'Chinese Name', width: 160 },
 ];
 
 const rightColumns: GridColDef[] = [
@@ -26,11 +26,11 @@ const config: PspListConfig<MoInChargePatientRecord> = {
   servletUrl: 'moinchargeservlet',
   dataRoot: 'moPatList',
   sortOptions: moInChargeSortOptions,
-  defaultSortIndex: 0,
+  defaultSortIndex: 1,
   pageSize: 7,
 };
 
-export interface List3Props {
+interface List3Props {
   params: Record<string, string>;
   onPatientSelect: (patient: MoInChargePatientRecord) => void;
 }
@@ -41,8 +41,9 @@ export function List3MoInCharge({ params, onPatientSelect }: List3Props): React.
       <PspList.SelectionPanel>
         <span>MO In-Charge Patient List</span>
       </PspList.SelectionPanel>
-      <PspList.DualGrid leftColumns={leftColumns} rightColumns={rightColumns} />
-      <PspList.SortMenu sortLabels={moInChargeSortOptions.map((s) => s.label)} />
+      <PspList.SortMenu sortLabels={moInChargeSortOptions.map((s) => s.label)}>
+        <PspList.DualGrid leftColumns={leftColumns} rightColumns={rightColumns} />
+      </PspList.SortMenu>
     </PspList>
   );
 }

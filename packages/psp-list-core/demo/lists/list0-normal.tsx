@@ -6,10 +6,10 @@ import type { NormalPatientRecord } from '../../src/types/patient-record';
 import { normalSortOptions } from '../../src/utils/sort-comparators';
 
 const leftColumns: GridColDef[] = [
-  { field: 'wardCodeDisp', headerName: 'Ward', width: 65 },
-  { field: 'bedNoDisp', headerName: 'Bed', width: 100 },
+  { field: 'wardCode', headerName: 'Ward', width: 65 },
+  { field: 'bed', headerName: 'Bed', width: 100 },
   { field: 'name', headerName: 'English Name', flex: 1, minWidth: 200 },
-  { field: 'chineseNameDisp', headerName: 'Chinese Name', width: 160 },
+  { field: 'chineseName', headerName: 'Chinese Name', width: 160 },
 ];
 
 const rightColumns: GridColDef[] = [
@@ -29,7 +29,7 @@ const config: PspListConfig<NormalPatientRecord> = {
   defaultSortIndex: 1,
 };
 
-export interface List0Props {
+interface List0Props {
   params: Record<string, string>;
   onPatientSelect: (patient: NormalPatientRecord) => void;
 }
@@ -40,8 +40,9 @@ export function List0Normal({ params, onPatientSelect }: List0Props): React.Reac
       <PspList.SelectionPanel>
         <span>Normal Patient List</span>
       </PspList.SelectionPanel>
-      <PspList.DualGrid leftColumns={leftColumns} rightColumns={rightColumns} />
-      <PspList.SortMenu sortLabels={normalSortOptions.map((s) => s.label)} />
+      <PspList.SortMenu sortLabels={normalSortOptions.map((s) => s.label)}>
+        <PspList.DualGrid leftColumns={leftColumns} rightColumns={rightColumns} />
+      </PspList.SortMenu>
     </PspList>
   );
 }
