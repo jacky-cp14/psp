@@ -1,15 +1,20 @@
-import React, { useRef, useCallback, startTransition } from "react";
+import React, { useRef, useCallback, useMemo, startTransition } from "react";
 import { DataGridPro } from "@mui/x-data-grid-pro";
 import type { GridColDef, GridRowParams } from "@mui/x-data-grid-pro";
 import { PanelGroup, Panel, PanelResizeHandle } from "react-resizable-panels";
 import { usePspList } from "../context/PspListContext";
 import { useKeyboardNavigation } from "../hooks/useKeyboardNavigation";
+import type { RowColorScheme } from "../utils/row-styling";
+import { getRowClass, rowColorSx } from "../utils/row-styling";
 
 export interface DualGridProps {
   leftColumns: GridColDef[];
   rightColumns: GridColDef[];
   defaultSplit?: number;
   rowHeight?: number;
+  /** Row color scheme — use resolveColorScheme() to map from psp_* config params */
+  colorScheme?: RowColorScheme;
+  /** Additional custom row class names (composed with library's color classes) */
   getRowClassName?: (params: GridRowParams) => string;
   onRowDoubleClick?: () => void;
 }
@@ -25,10 +30,11 @@ export function DualGrid({
   rightColumns,
   defaultSplit = 35,
   rowHeight = ROW_HEIGHT,
-  getRowClassName,
+  colorScheme,
+  getRowClassName: customGetRowClassName,
   onRowDoubleClick,
 }: DualGridProps): React.ReactElement {
-  const { rows, selectedRowId, setSelectedRowId } = usePspList();
+  const { rows, selectedRowId, setSelectedRowId, sortModel, setSortModel } = usePspList();
   const scrollContainerRef = useRef<HTMLDivElement>(null);
 
   const selectedIndex =
@@ -62,6 +68,27 @@ export function DualGrid({
 
   const selectionModel = selectedRowId !== null ? [selectedRowId] : [];
 
+  const handleSortModelChange = useCallback(
+    (newModel: Parameters<typeof setSortModel>[0]) => {
+      setSortModel(newModel);
+    },
+    [setSortModel],
+  );
+
+  const composedGetRowClassName = useCallback(
+    (params: { indexRelativeToCurrentPage: number } & GridRowParams) => {
+      const colorClass = getRowClass(params.indexRelativeToCurrentPage, colorScheme);
+      const customClass = customGetRowClassName?.(params) ?? '';
+      return [colorClass, customClass].filter(Boolean).join(' ');
+    },
+    [colorScheme, customGetRowClassName],
+  );
+
+  const gridSx = useMemo(
+    () => (colorScheme ? rowColorSx : undefined),
+    [colorScheme],
+  );
+
   const sharedGridProps = {
     rows,
     rowHeight,
@@ -70,11 +97,15 @@ export function DualGrid({
     disableColumnMenu: true,
     disableColumnFilter: true,
     disableColumnSelector: true,
-    sortModel: [] as [],
+    disableColumnSorting: false,
+    sortingMode: 'client' as const,
+    sortModel,
+    onSortModelChange: handleSortModelChange,
     selectionModel,
     onRowClick: handleRowClick,
     onRowDoubleClick: handleDoubleClick,
-    getRowClassName,
+    getRowClassName: composedGetRowClassName,
+    sx: gridSx,
     componentsProps: {
       row: { style: { cursor: "pointer" } },
     },

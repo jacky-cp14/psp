@@ -12,7 +12,7 @@ import { DualGrid } from './DualGrid';
 import { SelectionPanel } from './SelectionPanel';
 import { SortMenu } from './SortMenu';
 import { PrintDialog } from './PrintDialog';
-import type { GridRowId } from '@mui/x-data-grid-pro';
+import type { GridRowId, GridSortModel } from '@mui/x-data-grid-pro';
 
 export interface PspListProps<T extends PatientRecord = PatientRecord> {
   config: PspListConfig<T>;
@@ -51,10 +51,25 @@ function PspListRoot<T extends PatientRecord>({
     filterPredicates as Array<FilterPredicate<PatientRecord>>,
   );
 
+  const [sortModel, setSortModel] = useState<GridSortModel>([]);
+
+  /** When sortModel is set (header sort), pass filtered rows and grid sorts. When empty, use context menu sort. */
   const processedRows = useMemo(() => {
     const filtered = filterRows(rawRows as PatientRecord[]);
+    if (sortModel.length > 0) {
+      return filtered;
+    }
     return sortRows(filtered);
-  }, [rawRows, filterRows, sortRows]);
+  }, [rawRows, filterRows, sortRows, sortModel.length]);
+
+  /** Context menu sort: clear header sort so menu comparator applies. */
+  const handleSetSortIndex = useCallback(
+    (index: number) => {
+      setSortModel([]);
+      setSortIndex(index);
+    },
+    [setSortIndex],
+  );
 
   const { selectedRowId, setSelectedRowId, onPatientSubmit } = usePatientSelection({
     rows: processedRows,
@@ -73,6 +88,8 @@ function PspListRoot<T extends PatientRecord>({
       rows: processedRows,
       selectedRowId,
       currentSortIndex,
+      sortModel,
+      setSortModel,
       filterState,
       langMode,
       frameMode,
@@ -80,15 +97,15 @@ function PspListRoot<T extends PatientRecord>({
       error: error ?? null,
       refetch,
       setSelectedRowId: setSelectedRowId as (id: GridRowId | null) => void,
-      setSortIndex,
+      setSortIndex: handleSetSortIndex,
       setFilterState,
       toggleLang,
       toggleFrame,
     }),
     [
-      processedRows, selectedRowId, currentSortIndex, filterState,
-      langMode, frameMode, isLoading, error, refetch,
-      setSelectedRowId, setSortIndex, setFilterState, toggleLang, toggleFrame,
+      processedRows, selectedRowId, currentSortIndex, sortModel,
+      filterState, langMode, frameMode, isLoading, error, refetch,
+      setSelectedRowId, handleSetSortIndex, setFilterState, toggleLang, toggleFrame,
     ],
   );
 

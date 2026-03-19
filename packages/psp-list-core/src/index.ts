@@ -28,7 +28,6 @@ export type {
 } from './types/list-config';
 export type {
   PspGridColDef,
-  RowClassNameParams,
   GridRowId,
 } from './types/grid';
 
@@ -91,3 +90,7 @@ export {
   activeMoSortOptions,
   activeTeamSortOptions,
 } from './utils/sort-comparators';
+
+// Row styling
+export type { RowColorScheme, ResolveColorSchemeInput } from './utils/row-styling';
+export { resolveColorScheme, ROW_COLORS } from './utils/row-styling';

@@ -8,13 +8,15 @@ import { usePspList } from '../context/PspListContext';
 
 export interface SortMenuProps {
   sortLabels: string[];
+  children?: React.ReactNode;
 }
 
 /**
- * Context menu for sorting, triggered by right-click on the grid area.
- * Reads current sort state from PspListContext.
+ * Context menu for sorting. Wraps children so right-clicking anywhere inside
+ * the wrapped area opens the sort option menu. Uses `display: contents` to
+ * avoid interfering with the wrapped element's layout.
  */
-export function SortMenu({ sortLabels }: SortMenuProps): React.ReactElement {
+export function SortMenu({ sortLabels, children }: SortMenuProps): React.ReactElement {
   const { currentSortIndex, setSortIndex } = usePspList();
   const [anchorPosition, setAnchorPosition] = useState<{ top: number; left: number } | null>(null);
 
@@ -41,7 +43,9 @@ export function SortMenu({ sortLabels }: SortMenuProps): React.ReactElement {
         onContextMenu={handleContextMenu}
         data-testid="sort-menu-trigger"
         style={{ display: 'contents' }}
-      />
+      >
+        {children}
+      </div>
       <Menu
         open={anchorPosition !== null}
         onClose={handleClose}
@@ -50,7 +54,7 @@ export function SortMenu({ sortLabels }: SortMenuProps): React.ReactElement {
       >
         {sortLabels.map((label, index) => (
           <MenuItem
-            key={label}
+            key={`${label}-${index}`}
             onClick={() => handleSelect(index)}
             selected={index === currentSortIndex}
           >

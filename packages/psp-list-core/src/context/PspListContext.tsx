@@ -1,15 +1,19 @@
 import React, { createContext, useContext } from 'react';
 import type { PatientRecord } from '../types/patient-record';
 import type { FilterState } from '../types/list-config';
-import type { GridRowId } from '@mui/x-data-grid-pro';
+import type { GridRowId, GridSortModel } from '@mui/x-data-grid-pro';
 
 export interface PspListContextValue {
   /** Fetched and filtered rows */
   rows: PatientRecord[];
   /** Currently selected row ID (null if none) */
   selectedRowId: GridRowId | null;
-  /** Current sort option index */
+  /** Current sort option index (context menu) */
   currentSortIndex: number;
+  /** Column header sort model — when non-empty, grid sorts by this and shows header indicators */
+  sortModel: GridSortModel;
+  /** Set column header sort model (from header click) */
+  setSortModel: (model: GridSortModel) => void;
   /** Filter state — consuming app manages keys */
   filterState: FilterState;
   /** Language mode: 0 = English, 1 = Chinese */
@@ -24,7 +28,7 @@ export interface PspListContextValue {
   refetch: () => void;
   /** Set selected row (from row click) */
   setSelectedRowId: (id: GridRowId | null) => void;
-  /** Set sort option index */
+  /** Set sort option index (context menu; clears sortModel so menu sort applies) */
   setSortIndex: (index: number) => void;
   /** Update filter state */
   setFilterState: (state: FilterState | ((prev: FilterState) => FilterState)) => void;
