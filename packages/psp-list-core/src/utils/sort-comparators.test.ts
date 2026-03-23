@@ -1,10 +1,11 @@
-import { buildComparator } from './sort-comparators';
-import type { SortKey } from './sort-comparators';
+import { buildComparator, buildFieldTypeMap } from './sort-comparators';
+import type { SortKey, FieldTypeMap } from './sort-comparators';
+import type { GridColDef } from '@mui/x-data-grid-pro';
 
 type Row = Record<string, unknown>;
 
-function sort(rows: Row[], keys: SortKey[]): Row[] {
-  return [...rows].sort(buildComparator(keys));
+function sort(rows: Row[], keys: SortKey[], fieldTypes?: FieldTypeMap): Row[] {
+  return [...rows].sort(buildComparator(keys, fieldTypes));
 }
 
 describe('buildComparator', () => {
@@ -106,11 +107,11 @@ describe('buildComparator', () => {
   });
 
   // -----------------------------------------------------------------------
-  // Date sorting
+  // DateTime sorting
   // -----------------------------------------------------------------------
-  describe('date sorting', () => {
+  describe('dateTime sorting', () => {
     const ascByDate: SortKey[] = [
-      { field: 'dt', direction: 'ASC', type: 'date' },
+      { field: 'dt', direction: 'ASC', type: 'dateTime' },
     ];
 
     it('should sort ISO date strings ASC', () => {
@@ -128,7 +129,7 @@ describe('buildComparator', () => {
 
     it('should sort ISO date strings DESC', () => {
       const keys: SortKey[] = [
-        { field: 'dt', direction: 'DESC', type: 'date' },
+        { field: 'dt', direction: 'DESC', type: 'dateTime' },
       ];
       const rows = [{ dt: '2024-01-01' }, { dt: '2024-12-31' }];
       expect(sort(rows, keys).map((r) => r.dt)).toEqual([
@@ -268,9 +269,9 @@ describe('buildComparator', () => {
       expect(cmp({ x: null }, { x: 0 })).toBe(0);
     });
 
-    it('should treat null as timestamp 0 for date sort', () => {
+    it('should treat null as timestamp 0 for dateTime sort', () => {
       const cmp = buildComparator([
-        { field: 'x', direction: 'ASC', type: 'date' },
+        { field: 'x', direction: 'ASC', type: 'dateTime' },
       ]);
       expect(cmp({ x: null }, { x: '2024-01-01' })).toBeLessThan(0);
     });
@@ -339,11 +340,11 @@ describe('buildComparator', () => {
   });
 
   // -----------------------------------------------------------------------
-  // Date edge cases
+  // DateTime edge cases
   // -----------------------------------------------------------------------
-  describe('date edge cases', () => {
+  describe('dateTime edge cases', () => {
     const dateKey: SortKey[] = [
-      { field: 'dt', direction: 'ASC', type: 'date' },
+      { field: 'dt', direction: 'ASC', type: 'dateTime' },
     ];
 
     it('should handle ISO string with timezone offset', () => {
@@ -431,5 +432,143 @@ describe('buildComparator', () => {
       const sorted = sort(rows, keys);
       expect(sorted.map((r) => r.id)).toEqual([1, 2, 3]);
     });
+  });
+
+  // -----------------------------------------------------------------------
+  // fieldTypes parameter
+  // -----------------------------------------------------------------------
+  describe('fieldTypes parameter', () => {
+    it('should resolve dateTime from fieldTypes when SortKey.type is omitted', () => {
+      const fieldTypes: FieldTypeMap = { dt: 'dateTime' };
+      const keys: SortKey[] = [{ field: 'dt', direction: 'ASC' }];
+      const rows = [
+        { dt: new Date('2024-06-15') },
+        { dt: new Date('2024-01-01') },
+        { dt: new Date('2024-03-10') },
+      ];
+      // String sort would treat Date objects as '' (non-string) → all equal → original order preserved.
+      // dateTime sort orders by timestamp, proving the fieldTypes mapping works.
+      const sorted = sort(rows, keys, fieldTypes);
+      expect(sorted.map((r) => (r.dt as Date).toISOString())).toEqual([
+        '2024-01-01T00:00:00.000Z',
+        '2024-03-10T00:00:00.000Z',
+        '2024-06-15T00:00:00.000Z',
+      ]);
+    });
+
+    it('should resolve numeric type from fieldTypes', () => {
+      const fieldTypes: FieldTypeMap = { score: 'numeric' };
+      const keys: SortKey[] = [{ field: 'score', direction: 'ASC' }];
+      const rows = [{ score: 10 }, { score: 9 }, { score: 20 }];
+      expect(sort(rows, keys, fieldTypes).map((r) => r.score)).toEqual([9, 10, 20]);
+    });
+
+    it('should let SortKey.type override fieldTypes', () => {
+      const fieldTypes: FieldTypeMap = { v: 'numeric' };
+      const keys: SortKey[] = [{ field: 'v', direction: 'ASC', type: 'string' }];
+      const rows = [{ v: '10' }, { v: '9' }, { v: '20' }];
+      // String sort: '10' < '20' < '9' (lexicographic)
+      expect(sort(rows, keys, fieldTypes).map((r) => r.v)).toEqual(['10', '20', '9']);
+    });
+
+    it('should default to string when field is absent from fieldTypes', () => {
+      const fieldTypes: FieldTypeMap = { other: 'numeric' };
+      const keys: SortKey[] = [{ field: 'v', direction: 'ASC' }];
+      const rows = [{ v: '10' }, { v: '9' }, { v: '20' }];
+      // String sort: '10' < '20' < '9'
+      expect(sort(rows, keys, fieldTypes).map((r) => r.v)).toEqual(['10', '20', '9']);
+    });
+
+    it('should work without fieldTypes (backward compat)', () => {
+      const keys: SortKey[] = [
+        { field: 'dt', direction: 'ASC', type: 'dateTime' },
+      ];
+      const rows = [{ dt: '2024-06-15' }, { dt: '2024-01-01' }];
+      expect(sort(rows, keys).map((r) => r.dt)).toEqual([
+        '2024-01-01',
+        '2024-06-15',
+      ]);
+    });
+
+    it('should apply fieldTypes across multi-key sorts', () => {
+      const fieldTypes: FieldTypeMap = { dt: 'dateTime', priority: 'numeric' };
+      const keys: SortKey[] = [
+        { field: 'dt', direction: 'ASC' },
+        { field: 'priority', direction: 'DESC' },
+      ];
+      const rows = [
+        { dt: '2024-01-01', priority: 1 },
+        { dt: '2024-01-01', priority: 3 },
+        { dt: '2024-06-15', priority: 2 },
+      ];
+      const sorted = sort(rows, keys, fieldTypes);
+      expect(sorted).toEqual([
+        { dt: '2024-01-01', priority: 3 },
+        { dt: '2024-01-01', priority: 1 },
+        { dt: '2024-06-15', priority: 2 },
+      ]);
+    });
+  });
+});
+
+describe('buildFieldTypeMap', () => {
+  it('should map number column type to numeric', () => {
+    const cols: GridColDef[] = [
+      { field: 'score', type: 'number', headerName: 'Score', width: 100 },
+    ];
+    expect(buildFieldTypeMap(cols)).toEqual({ score: 'numeric' });
+  });
+
+  it('should map date column type to dateTime', () => {
+    const cols: GridColDef[] = [
+      { field: 'dt', type: 'date', headerName: 'Date', width: 100 },
+    ];
+    expect(buildFieldTypeMap(cols)).toEqual({ dt: 'dateTime' });
+  });
+
+  it('should map dateTime column type to dateTime', () => {
+    const cols: GridColDef[] = [
+      { field: 'dt', type: 'dateTime', headerName: 'DateTime', width: 100 },
+    ];
+    expect(buildFieldTypeMap(cols)).toEqual({ dt: 'dateTime' });
+  });
+
+  it('should omit string columns (default fallback)', () => {
+    const cols: GridColDef[] = [
+      { field: 'name', type: 'string', headerName: 'Name', width: 100 },
+    ];
+    expect(buildFieldTypeMap(cols)).toEqual({});
+  });
+
+  it('should omit columns with no type', () => {
+    const cols: GridColDef[] = [
+      { field: 'name', headerName: 'Name', width: 100 },
+    ];
+    expect(buildFieldTypeMap(cols)).toEqual({});
+  });
+
+  it('should handle mixed column types', () => {
+    const cols: GridColDef[] = [
+      { field: 'name', headerName: 'Name', width: 100 },
+      { field: 'age', type: 'number', headerName: 'Age', width: 80 },
+      { field: 'admissionDtm', type: 'dateTime', headerName: 'Admission', width: 200 },
+      { field: 'ward', type: 'string', headerName: 'Ward', width: 60 },
+    ];
+    expect(buildFieldTypeMap(cols)).toEqual({
+      age: 'numeric',
+      admissionDtm: 'dateTime',
+    });
+  });
+
+  it('should return empty map for empty columns', () => {
+    expect(buildFieldTypeMap([])).toEqual({});
+  });
+
+  it('should ignore boolean and singleSelect types', () => {
+    const cols: GridColDef[] = [
+      { field: 'active', type: 'boolean', headerName: 'Active', width: 80 },
+      { field: 'status', type: 'singleSelect', headerName: 'Status', width: 100 },
+    ];
+    expect(buildFieldTypeMap(cols)).toEqual({});
   });
 });

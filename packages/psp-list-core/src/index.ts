@@ -53,10 +53,11 @@ export { usePatientSelection } from './hooks/usePatientSelection';
 export type { UsePatientSelectionConfig, UsePatientSelectionReturn } from './hooks/usePatientSelection';
 
 // Utilities
-export { buildComparator } from './utils/sort-comparators';
+export { buildComparator, buildFieldTypeMap } from './utils/sort-comparators';
 export type {
   SortDirection,
   SortFieldType,
+  FieldTypeMap,
   SortKey,
   SortOption,
 } from './utils/sort-comparators';

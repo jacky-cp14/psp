@@ -14,7 +14,7 @@ const leftColumns: GridColDef[] = [
 const rightColumns: GridColDef[] = [
   { field: 'caseNo', headerName: 'Episode', width: 152 },
   { field: 'specCode', headerName: 'Spec.', width: 62 },
-  { field: 'admissionDtm', headerName: 'Admission Date/Time', width: 202 },
+  { field: 'admissionDtm', headerName: 'Admission Date/Time', type: 'dateTime', width: 202 },
   { field: 'sexAge', headerName: 'Sex/Age', width: 82 },
   { field: 'sourceCode', headerName: 'Source Code', width: 122 },
   { field: 'hkid', headerName: 'HKID', width: 124 },
@@ -23,7 +23,7 @@ const rightColumns: GridColDef[] = [
 
 const sortOptions: SortOption[] = [
   { label: 'By Admission Date/Time', keys: [
-    { field: 'admissionDtm', direction: 'ASC', type: 'date' },
+    { field: 'admissionDtm', direction: 'ASC' },
     { field: 'wardCode', direction: 'ASC' },
     { field: 'bedNo', direction: 'ASC' },
     { field: 'name', direction: 'ASC' },

@@ -1,6 +1,7 @@
 import { useState, useCallback, useMemo } from 'react';
 import type { PatientRecord } from '../types/patient-record';
 import type { SortOption } from '../types/list-config';
+import type { FieldTypeMap } from '../utils/sort-comparators';
 import { buildComparator } from '../utils/sort-comparators';
 
 export interface UseSortReturn<T extends PatientRecord> {
@@ -16,6 +17,7 @@ export interface UseSortReturn<T extends PatientRecord> {
 export function useSort<T extends PatientRecord>(
   options: SortOption[],
   defaultIndex: number | null = 0,
+  fieldTypes?: FieldTypeMap,
 ): UseSortReturn<T> {
   const [currentSortIndex, setCurrentSortIndex] = useState(defaultIndex);
 
@@ -32,8 +34,8 @@ export function useSort<T extends PatientRecord>(
     if (currentSortIndex === null) return null;
     const option = options[currentSortIndex];
     if (!option) return null;
-    return buildComparator<T>(option.keys);
-  }, [options, currentSortIndex]);
+    return buildComparator<T>(option.keys, fieldTypes);
+  }, [options, currentSortIndex, fieldTypes]);
 
   const sortRows = useCallback(
     (rows: T[]): T[] => {

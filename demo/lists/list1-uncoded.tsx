@@ -13,16 +13,16 @@ const leftColumns: GridColDef[] = [
 const rightColumns: GridColDef[] = [
   { field: 'caseNo', headerName: 'Episode', width: 152 },
   { field: 'specCode', headerName: 'Spec.', width: 62 },
-  { field: 'admissionDtm', headerName: 'Admission Date/Time', width: 202 },
+  { field: 'admissionDtm', headerName: 'Admission Date/Time', type: 'dateTime', width: 202 },
   { field: 'sexAge', headerName: 'Sex/Age', width: 82 },
   { field: 'sourceCode', headerName: 'Source Code', width: 122 },
-  { field: 'dischargeDtm', headerName: 'Discharge Date/Time', width: 202 },
+  { field: 'dischargeDtm', headerName: 'Discharge Date/Time', type: 'dateTime', width: 202 },
   { field: 'hkid', headerName: 'HKID', width: 124 },
 ];
 
 const sortOptions: SortOption[] = [
   { label: 'By Admission Date/Time', keys: [
-    { field: 'admissionDtm', direction: 'ASC', type: 'date' },
+    { field: 'admissionDtm', direction: 'ASC' },
     { field: 'wardCode', direction: 'ASC' },
     { field: 'bedNo', direction: 'ASC' },
     { field: 'name', direction: 'ASC' },
@@ -34,7 +34,7 @@ const sortOptions: SortOption[] = [
     { field: 'name', direction: 'ASC' },
   ]},
   { label: 'By Discharge Date/Time', keys: [
-    { field: 'dischargeDtm', direction: 'DESC', type: 'date' },
+    { field: 'dischargeDtm', direction: 'DESC' },
     { field: 'bedNo', direction: 'ASC' },
     { field: 'name', direction: 'ASC' },
   ]},

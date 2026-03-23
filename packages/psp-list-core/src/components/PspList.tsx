@@ -5,6 +5,7 @@ import { pspTheme } from '../theme';
 import type { PatientRecord } from '../types/patient-record';
 import type { SelectionMode } from '../types/list-config';
 import type { SortOption } from '../utils/sort-comparators';
+import { buildFieldTypeMap } from '../utils/sort-comparators';
 import type { RowColorScheme } from '../utils/row-styling';
 import type { PspListContextValue } from '../context/PspListContext';
 import { PspListProvider } from '../context/PspListContext';
@@ -64,9 +65,15 @@ export function PspList<T extends PatientRecord>({
   pageSize: _pageSize,
   selectionMode: _selectionMode,
 }: PspListProps<T>): React.ReactElement {
+  const fieldTypes = useMemo(
+    () => buildFieldTypeMap([...leftColumns, ...rightColumns]),
+    [leftColumns, rightColumns],
+  );
+
   const { currentSortIndex, setSortIndex, sortRows } = useSort<PatientRecord>(
     sortOptions,
     defaultSortIndex,
+    fieldTypes,
   );
 
   const [sortModel, setSortModel] = useState<GridSortModel>([]);

@@ -18,13 +18,13 @@ const rightColumns: GridColDef[] = [
   { field: 'specCode', headerName: 'Spec.', width: 62 },
   { field: 'teamCode', headerName: 'Team', width: 120 },
   { field: 'specIC', headerName: 'Specialist I/C', width: 200 },
-  { field: 'admissionDtm', headerName: 'Admission Date/Time', width: 202 },
+  { field: 'admissionDtm', headerName: 'Admission Date/Time', type: 'dateTime', width: 202 },
   { field: 'sourceCode', headerName: 'Source Code', width: 122 },
 ];
 
 const sortOptions: SortOption[] = [
   { label: 'By Admission Date/Time', keys: [
-    { field: 'admissionDtm', direction: 'ASC', type: 'date' },
+    { field: 'admissionDtm', direction: 'ASC' },
     { field: 'wardCode', direction: 'ASC' },
     { field: 'bedNo', direction: 'ASC' },
     { field: 'name', direction: 'ASC' },
