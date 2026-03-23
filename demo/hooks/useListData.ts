@@ -1,6 +1,6 @@
 import { useCallback, useMemo } from 'react';
 import { useQuery, useQueryClient } from '@tanstack/react-query';
-import type { PatientRecord } from '../types/patient-record';
+import type { PatientRecord } from '@psp/core';
 
 export interface UseListDataConfig {
   servletUrl: string;

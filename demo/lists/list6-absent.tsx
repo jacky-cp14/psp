@@ -2,6 +2,7 @@ import React from 'react';
 import type { GridColDef } from '@mui/x-data-grid-pro';
 import { PspList } from '@psp/core';
 import type { NormalPatientRecord, PspListConfig, SortOption } from '@psp/core';
+import { useListData } from '../hooks/useListData';
 
 const leftColumns: GridColDef[] = [
   { field: 'wardCode', headerName: 'Ward', width: 65 },
@@ -69,8 +70,6 @@ const sortOptions: SortOption[] = [
 ];
 
 const config: PspListConfig = {
-  servletUrl: 'absentservlet',
-  dataRoot: 'cpiAbsPatList',
   sortOptions,
   defaultSortIndex: 7,
 };
@@ -81,8 +80,14 @@ interface List6Props {
 }
 
 export function List6Absent({ params, onPatientSelect }: List6Props): React.ReactElement {
+  const { rows } = useListData<NormalPatientRecord>({
+    servletUrl: 'absentservlet',
+    dataRoot: 'cpiAbsPatList',
+    params,
+  });
+
   return (
-    <PspList config={config} params={params} onPatientSelect={onPatientSelect}>
+    <PspList rows={rows} config={config} onPatientSelect={onPatientSelect}>
       <PspList.SelectionPanel>
         <span>Absent Patient List</span>
       </PspList.SelectionPanel>

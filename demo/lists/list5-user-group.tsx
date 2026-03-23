@@ -2,6 +2,7 @@ import React from 'react';
 import type { GridColDef } from '@mui/x-data-grid-pro';
 import { PspList } from '@psp/core';
 import type { BasePatientRecord, PspListConfig, SortOption } from '@psp/core';
+import { useListData } from '../hooks/useListData';
 
 const leftColumns: GridColDef[] = [
   { field: 'wardCode', headerName: 'Ward', width: 65 },
@@ -73,8 +74,6 @@ const sortOptions: SortOption[] = [
 ];
 
 const config: PspListConfig = {
-  servletUrl: 'usergroupservlet',
-  dataRoot: 'cpiUserGrpPatList',
   sortOptions,
   defaultSortIndex: 8,
 };
@@ -85,8 +84,14 @@ interface List5Props {
 }
 
 export function List5UserGroup({ params, onPatientSelect }: List5Props): React.ReactElement {
+  const { rows } = useListData<BasePatientRecord>({
+    servletUrl: 'usergroupservlet',
+    dataRoot: 'cpiUserGrpPatList',
+    params,
+  });
+
   return (
-    <PspList config={config} params={params} onPatientSelect={onPatientSelect}>
+    <PspList rows={rows} config={config} onPatientSelect={onPatientSelect}>
       <PspList.SelectionPanel>
         <span>User Group List</span>
       </PspList.SelectionPanel>

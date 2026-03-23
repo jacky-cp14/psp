@@ -2,6 +2,7 @@ import React from 'react';
 import type { GridColDef } from '@mui/x-data-grid-pro';
 import { PspList } from '@psp/core';
 import type { GopcPatientRecord, PspListConfig, SortOption } from '@psp/core';
+import { useListData } from '../hooks/useListData';
 
 const leftColumns: GridColDef[] = [
   { field: 'slotDatetime', headerName: 'Slot Date/Time', width: 190 },
@@ -51,8 +52,6 @@ const sortOptions: SortOption[] = [
 ];
 
 const config: PspListConfig = {
-  servletUrl: 'msgopcservlet',
-  dataRoot: 'msGopcPatList',
   sortOptions,
   defaultSortIndex: 0,
   selectionMode: 'hkidSearch',
@@ -64,8 +63,14 @@ interface List2Props {
 }
 
 export function List2MsGopc({ params, onPatientSelect }: List2Props): React.ReactElement {
+  const { rows } = useListData<GopcPatientRecord>({
+    servletUrl: 'msgopcservlet',
+    dataRoot: 'msGopcPatList',
+    params,
+  });
+
   return (
-    <PspList config={config} params={params} onPatientSelect={onPatientSelect}>
+    <PspList rows={rows} config={config} onPatientSelect={onPatientSelect}>
       <PspList.SelectionPanel>
         <span>MS GOPC Appointment List</span>
       </PspList.SelectionPanel>

@@ -2,6 +2,7 @@ import React from 'react';
 import type { GridColDef } from '@mui/x-data-grid-pro';
 import { PspList } from '@psp/core';
 import type { NormalPatientRecord, PspListConfig, SortOption } from '@psp/core';
+import { useListData } from '../hooks/useListData';
 
 const leftColumns: GridColDef[] = [
   { field: 'wardCode', headerName: 'Ward', width: 65 },
@@ -70,8 +71,6 @@ const sortOptions: SortOption[] = [
 ];
 
 const config: PspListConfig = {
-  servletUrl: 'cpicaseservlet',
-  dataRoot: 'cpiPatList',
   sortOptions,
   defaultSortIndex: 1,
 };
@@ -82,8 +81,18 @@ interface List0Props {
 }
 
 export function List0Normal({ params, onPatientSelect }: List0Props): React.ReactElement {
+  const { rows } = useListData<NormalPatientRecord>({
+    servletUrl: 'cpicaseservlet',
+    dataRoot: 'cpiPatList',
+    params,
+  });
+
   return (
-    <PspList config={config} params={params} onPatientSelect={onPatientSelect}>
+    <PspList
+      rows={rows}
+      config={config}
+      onPatientSelect={onPatientSelect}
+    >
       <PspList.SelectionPanel>
         <span>Normal Patient List</span>
       </PspList.SelectionPanel>

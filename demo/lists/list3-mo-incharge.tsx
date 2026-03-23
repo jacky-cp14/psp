@@ -2,6 +2,7 @@ import React from 'react';
 import type { GridColDef } from '@mui/x-data-grid-pro';
 import { PspList } from '@psp/core';
 import type { MoInChargePatientRecord, PspListConfig, SortOption } from '@psp/core';
+import { useListData } from '../hooks/useListData';
 
 const leftColumns: GridColDef[] = [
   { field: 'bed', headerName: 'Bed', width: 100 },
@@ -76,8 +77,6 @@ const sortOptions: SortOption[] = [
 ];
 
 const config: PspListConfig = {
-  servletUrl: 'moinchargeservlet',
-  dataRoot: 'moPatList',
   sortOptions,
   defaultSortIndex: 1,
   pageSize: 7,
@@ -89,8 +88,14 @@ interface List3Props {
 }
 
 export function List3MoInCharge({ params, onPatientSelect }: List3Props): React.ReactElement {
+  const { rows } = useListData<MoInChargePatientRecord>({
+    servletUrl: 'moinchargeservlet',
+    dataRoot: 'moPatList',
+    params,
+  });
+
   return (
-    <PspList config={config} params={params} onPatientSelect={onPatientSelect}>
+    <PspList rows={rows} config={config} onPatientSelect={onPatientSelect}>
       <PspList.SelectionPanel>
         <span>MO In-Charge Patient List</span>
       </PspList.SelectionPanel>

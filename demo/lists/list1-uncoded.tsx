@@ -2,6 +2,7 @@ import React from 'react';
 import type { GridColDef } from '@mui/x-data-grid-pro';
 import { PspList } from '@psp/core';
 import type { PspListConfig, SortOption, UncodedPatientRecord } from '@psp/core';
+import { useListData } from '../hooks/useListData';
 
 const leftColumns: GridColDef[] = [
   { field: 'bed', headerName: 'Bed', width: 100 },
@@ -70,8 +71,6 @@ const sortOptions: SortOption[] = [
 ];
 
 const config: PspListConfig = {
-  servletUrl: 'uncodeservlet',
-  dataRoot: 'cpiUnCodePatList',
   sortOptions,
   defaultSortIndex: 2,
 };
@@ -82,8 +81,14 @@ interface List1Props {
 }
 
 export function List1Uncoded({ params, onPatientSelect }: List1Props): React.ReactElement {
+  const { rows } = useListData<UncodedPatientRecord>({
+    servletUrl: 'uncodeservlet',
+    dataRoot: 'cpiUnCodePatList',
+    params,
+  });
+
   return (
-    <PspList config={config} params={params} onPatientSelect={onPatientSelect}>
+    <PspList rows={rows} config={config} onPatientSelect={onPatientSelect}>
       <PspList.SelectionPanel>
         <span>Uncoded Patient List</span>
       </PspList.SelectionPanel>

@@ -2,6 +2,7 @@ import React from 'react';
 import type { GridColDef } from '@mui/x-data-grid-pro';
 import { PspList } from '@psp/core';
 import type { ActiveTeamPatientRecord, PspListConfig, SortOption } from '@psp/core';
+import { useListData } from '../hooks/useListData';
 
 const leftColumns: GridColDef[] = [
   { field: 'wardCode2Disp', headerName: 'Ward', width: 65 },
@@ -83,8 +84,6 @@ const sortOptions: SortOption[] = [
 ];
 
 const config: PspListConfig = {
-  servletUrl: 'activeteamservlet',
-  dataRoot: 'cpiActiveTeamPatList',
   sortOptions,
   defaultSortIndex: 8,
 };
@@ -95,8 +94,14 @@ interface List9Props {
 }
 
 export function List9ActiveTeam({ params, onPatientSelect }: List9Props): React.ReactElement {
+  const { rows } = useListData<ActiveTeamPatientRecord>({
+    servletUrl: 'activeteamservlet',
+    dataRoot: 'cpiActiveTeamPatList',
+    params,
+  });
+
   return (
-    <PspList config={config} params={params} onPatientSelect={onPatientSelect}>
+    <PspList rows={rows} config={config} onPatientSelect={onPatientSelect}>
       <PspList.SelectionPanel>
         <span>Active Patient by Team</span>
       </PspList.SelectionPanel>
