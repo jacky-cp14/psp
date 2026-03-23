@@ -3,12 +3,14 @@
  * Keys match servlet response dataRoot so fetch mock can return them.
  * Generates 200 rows for stress-testing grids and sort/filter.
  */
-import type { NormalPatientRecord } from '../src/types/patient-record';
-import type { UncodedPatientRecord } from '../src/types/patient-record';
-import type { GopcPatientRecord } from '../src/types/patient-record';
-import type { MoInChargePatientRecord } from '../src/types/patient-record';
-import type { OpPatientRecord } from '../src/types/patient-record';
-import type { ActiveTeamPatientRecord } from '../src/types/patient-record';
+import type {
+  ActiveTeamPatientRecord,
+  GopcPatientRecord,
+  MoInChargePatientRecord,
+  NormalPatientRecord,
+  OpPatientRecord,
+  UncodedPatientRecord,
+} from '@psp/core';
 
 const ROW_COUNT = 200;
 

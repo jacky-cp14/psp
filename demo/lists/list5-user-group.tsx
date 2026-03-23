@@ -1,32 +1,31 @@
 import React from 'react';
 import type { GridColDef } from '@mui/x-data-grid-pro';
-import { PspList } from '../../src/components/PspList';
-import type { PspListConfig } from '../../src/types/list-config';
-import type { ActiveTeamPatientRecord } from '../../src/types/patient-record';
-import type { SortOption } from '../../src/utils/sort-comparators';
+import { PspList } from '@psp/core';
+import type { BasePatientRecord, PspListConfig, SortOption } from '@psp/core';
 
 const leftColumns: GridColDef[] = [
-  { field: 'wardCode2Disp', headerName: 'Ward', width: 65 },
+  { field: 'wardCode', headerName: 'Ward', width: 65 },
   { field: 'bed', headerName: 'Bed', width: 100 },
   { field: 'name', headerName: 'English Name', flex: 1, minWidth: 200 },
   { field: 'chineseName', headerName: 'Chinese Name', width: 160 },
-  { field: 'sexAge', headerName: 'Sex/Age', width: 90 },
-  { field: 'hkid', headerName: 'HKID', width: 140 },
 ];
 
 const rightColumns: GridColDef[] = [
   { field: 'caseNo', headerName: 'Episode', width: 152 },
   { field: 'specCode', headerName: 'Spec.', width: 62 },
-  { field: 'teamCode', headerName: 'Team', width: 120 },
-  { field: 'specIC', headerName: 'Specialist I/C', width: 200 },
   { field: 'admissionDtm', headerName: 'Admission Date/Time', width: 202 },
+  { field: 'sexAge', headerName: 'Sex/Age', width: 82 },
   { field: 'sourceCode', headerName: 'Source Code', width: 122 },
+  { field: 'hkid', headerName: 'HKID', width: 124 },
 ];
 
 const sortOptions: SortOption[] = [
   { label: 'By Admission Date/Time', keys: [
     { field: 'admissionDtm', direction: 'ASC', type: 'date' },
     { field: 'wardCode', direction: 'ASC' },
+    { field: 'name', direction: 'ASC' },
+  ]},
+  { label: 'By Bed, Name', keys: [
     { field: 'bedNo', direction: 'ASC' },
     { field: 'name', direction: 'ASC' },
   ]},
@@ -71,36 +70,25 @@ const sortOptions: SortOption[] = [
     { field: 'bedNo', direction: 'ASC' },
     { field: 'name', direction: 'ASC' },
   ]},
-  { label: 'By Ward, Bed, Specialty', keys: [
-    { field: 'wardCode', direction: 'ASC' },
-    { field: 'bedNo', direction: 'ASC' },
-    { field: 'specCode', direction: 'ASC' },
-  ]},
-  { label: 'By Team', keys: [
-    { field: 'teamCode', direction: 'ASC' },
-    { field: 'wardCode', direction: 'ASC' },
-    { field: 'bedNo', direction: 'ASC' },
-    { field: 'name', direction: 'ASC' },
-  ]},
 ];
 
 const config: PspListConfig = {
-  servletUrl: 'activeteamservlet',
-  dataRoot: 'cpiActiveTeamPatList',
+  servletUrl: 'usergroupservlet',
+  dataRoot: 'cpiUserGrpPatList',
   sortOptions,
   defaultSortIndex: 8,
 };
 
-interface List9Props {
+interface List5Props {
   params: Record<string, string>;
-  onPatientSelect: (patient: ActiveTeamPatientRecord) => void;
+  onPatientSelect: (patient: BasePatientRecord) => void;
 }
 
-export function List9ActiveTeam({ params, onPatientSelect }: List9Props): React.ReactElement {
+export function List5UserGroup({ params, onPatientSelect }: List5Props): React.ReactElement {
   return (
     <PspList config={config} params={params} onPatientSelect={onPatientSelect}>
       <PspList.SelectionPanel>
-        <span>Active Patient by Team</span>
+        <span>User Group List</span>
       </PspList.SelectionPanel>
       <PspList.SortMenu sortLabels={sortOptions.map((s) => s.label)}>
         <PspList.DualGrid leftColumns={leftColumns} rightColumns={rightColumns} />

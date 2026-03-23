@@ -1,9 +1,7 @@
 import React from 'react';
 import type { GridColDef } from '@mui/x-data-grid-pro';
-import { PspList } from '../../src/components/PspList';
-import type { PspListConfig } from '../../src/types/list-config';
-import type { BasePatientRecord } from '../../src/types/patient-record';
-import type { SortOption } from '../../src/utils/sort-comparators';
+import { PspList } from '@psp/core';
+import type { NormalPatientRecord, PspListConfig, SortOption } from '@psp/core';
 
 const leftColumns: GridColDef[] = [
   { field: 'wardCode', headerName: 'Ward', width: 65 },
@@ -19,12 +17,14 @@ const rightColumns: GridColDef[] = [
   { field: 'sexAge', headerName: 'Sex/Age', width: 82 },
   { field: 'sourceCode', headerName: 'Source Code', width: 122 },
   { field: 'hkid', headerName: 'HKID', width: 124 },
+  { field: 'mrn', headerName: 'MRN', width: 92 },
 ];
 
 const sortOptions: SortOption[] = [
   { label: 'By Admission Date/Time', keys: [
     { field: 'admissionDtm', direction: 'ASC', type: 'date' },
     { field: 'wardCode', direction: 'ASC' },
+    { field: 'bedNo', direction: 'ASC' },
     { field: 'name', direction: 'ASC' },
   ]},
   { label: 'By Bed, Name', keys: [
@@ -67,30 +67,25 @@ const sortOptions: SortOption[] = [
     { field: 'bedNo', direction: 'ASC' },
     { field: 'name', direction: 'ASC' },
   ]},
-  { label: 'By Ward, Bed, Name', keys: [
-    { field: 'wardCode', direction: 'ASC' },
-    { field: 'bedNo', direction: 'ASC' },
-    { field: 'name', direction: 'ASC' },
-  ]},
 ];
 
 const config: PspListConfig = {
-  servletUrl: 'usergroupservlet',
-  dataRoot: 'cpiUserGrpPatList',
+  servletUrl: 'cpicaseservlet',
+  dataRoot: 'cpiPatList',
   sortOptions,
-  defaultSortIndex: 8,
+  defaultSortIndex: 1,
 };
 
-interface List5Props {
+interface List0Props {
   params: Record<string, string>;
-  onPatientSelect: (patient: BasePatientRecord) => void;
+  onPatientSelect: (patient: NormalPatientRecord) => void;
 }
 
-export function List5UserGroup({ params, onPatientSelect }: List5Props): React.ReactElement {
+export function List0Normal({ params, onPatientSelect }: List0Props): React.ReactElement {
   return (
     <PspList config={config} params={params} onPatientSelect={onPatientSelect}>
       <PspList.SelectionPanel>
-        <span>User Group List</span>
+        <span>Normal Patient List</span>
       </PspList.SelectionPanel>
       <PspList.SortMenu sortLabels={sortOptions.map((s) => s.label)}>
         <PspList.DualGrid leftColumns={leftColumns} rightColumns={rightColumns} />

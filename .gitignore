@@ -10,3 +10,4 @@ dist/
 references/
 docs/
 .tmp/
+.pnpm-store/

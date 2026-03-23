@@ -1,0 +1,12 @@
+{
+  "name": "psp",
+  "private": true,
+  "scripts": {
+    "dev": "pnpm --filter psp-demo dev",
+    "build": "pnpm --filter @psp/core build",
+    "build:demo": "pnpm --filter psp-demo build",
+    "test": "pnpm --filter @psp/core test && pnpm --filter psp-demo test",
+    "test:core": "pnpm --filter @psp/core test",
+    "test:demo": "pnpm --filter psp-demo test"
+  }
+}

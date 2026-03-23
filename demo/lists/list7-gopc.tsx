@@ -1,9 +1,7 @@
 import React from 'react';
 import type { GridColDef } from '@mui/x-data-grid-pro';
-import { PspList } from '../../src/components/PspList';
-import type { PspListConfig } from '../../src/types/list-config';
-import type { GopcPatientRecord } from '../../src/types/patient-record';
-import type { SortOption } from '../../src/utils/sort-comparators';
+import { PspList } from '@psp/core';
+import type { GopcPatientRecord, PspListConfig, SortOption } from '@psp/core';
 
 const leftColumns: GridColDef[] = [
   { field: 'slotDatetime', headerName: 'Slot Date/Time', width: 190 },
@@ -53,23 +51,23 @@ const sortOptions: SortOption[] = [
 ];
 
 const config: PspListConfig = {
-  servletUrl: 'msgopcservlet',
-  dataRoot: 'msGopcPatList',
+  servletUrl: 'gopcservlet',
+  dataRoot: 'gopcPatList',
   sortOptions,
   defaultSortIndex: 0,
   selectionMode: 'hkidSearch',
 };
 
-interface List2Props {
+interface List7Props {
   params: Record<string, string>;
   onPatientSelect: (patient: GopcPatientRecord) => void;
 }
 
-export function List2MsGopc({ params, onPatientSelect }: List2Props): React.ReactElement {
+export function List7Gopc({ params, onPatientSelect }: List7Props): React.ReactElement {
   return (
     <PspList config={config} params={params} onPatientSelect={onPatientSelect}>
       <PspList.SelectionPanel>
-        <span>MS GOPC Appointment List</span>
+        <span>GOPC Appointment List</span>
       </PspList.SelectionPanel>
       <PspList.SortMenu sortLabels={sortOptions.map((s) => s.label)}>
         <PspList.DualGrid leftColumns={leftColumns} rightColumns={rightColumns} />

@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
-import type { PatientRecord } from '../src/types/patient-record';
+import type { PatientRecord } from '@psp/core';
 import { List0Normal } from './lists/list0-normal';
 import { List1Uncoded } from './lists/list1-uncoded';
 import { List2MsGopc } from './lists/list2-ms-gopc';

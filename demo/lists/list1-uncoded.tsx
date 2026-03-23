@@ -1,9 +1,7 @@
 import React from 'react';
 import type { GridColDef } from '@mui/x-data-grid-pro';
-import { PspList } from '../../src/components/PspList';
-import type { PspListConfig } from '../../src/types/list-config';
-import type { UncodedPatientRecord } from '../../src/types/patient-record';
-import type { SortOption } from '../../src/utils/sort-comparators';
+import { PspList } from '@psp/core';
+import type { PspListConfig, SortOption, UncodedPatientRecord } from '@psp/core';
 
 const leftColumns: GridColDef[] = [
   { field: 'bed', headerName: 'Bed', width: 100 },

@@ -2,9 +2,8 @@ import React, { useState, useRef, startTransition } from 'react';
 import { DataGridPro } from '@mui/x-data-grid-pro';
 import type { GridColDef, GridRowParams } from '@mui/x-data-grid-pro';
 import { PanelGroup, Panel, PanelResizeHandle } from 'react-resizable-panels';
-import { useKeyboardNavigation } from '../../src/hooks/useKeyboardNavigation';
+import { useKeyboardNavigation, type NormalPatientRecord } from '@psp/core';
 import { cpiPatList } from '../dummyData';
-import type { NormalPatientRecord } from '../../src/types/patient-record';
 import { List0Normal } from './list0-normal';
 
 const ROW_HEIGHT = 28;

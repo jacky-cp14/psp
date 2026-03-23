@@ -56,4 +56,4 @@ This isolated the exact cost of each layer and proved the fix needed to target r
 
 ## Perf Lab
 
-`demo/lists/perf-lab.tsx` — 5 layers (L0–L4) from vanilla DataGridPro to full PspList. Benchmark any architectural change here.
+`demo/lists/perf-lab.tsx` (repo root) — 5 layers (L0–L4) from vanilla DataGridPro to full PspList. Benchmark any architectural change here.
