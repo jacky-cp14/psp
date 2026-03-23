@@ -1,7 +1,7 @@
 import React from 'react';
 import type { GridColDef } from '@mui/x-data-grid-pro';
-import { PspList } from '@psp/core';
-import type { PspListConfig, SortOption, UncodedPatientRecord } from '@psp/core';
+import { PspList, SelectionPanel } from '@psp/core';
+import type { UncodedPatientRecord, SortOption } from '@psp/core';
 import { useListData } from '../hooks/useListData';
 
 const leftColumns: GridColDef[] = [
@@ -70,11 +70,6 @@ const sortOptions: SortOption[] = [
   ]},
 ];
 
-const config: PspListConfig = {
-  sortOptions,
-  defaultSortIndex: 2,
-};
-
 interface List1Props {
   params: Record<string, string>;
   onPatientSelect: (patient: UncodedPatientRecord) => void;
@@ -88,13 +83,16 @@ export function List1Uncoded({ params, onPatientSelect }: List1Props): React.Rea
   });
 
   return (
-    <PspList rows={rows} config={config} onPatientSelect={onPatientSelect}>
-      <PspList.SelectionPanel>
-        <span>Uncoded Patient List</span>
-      </PspList.SelectionPanel>
-      <PspList.SortMenu sortLabels={sortOptions.map((s) => s.label)}>
-        <PspList.DualGrid leftColumns={leftColumns} rightColumns={rightColumns} />
-      </PspList.SortMenu>
-    </PspList>
+    <>
+      <SelectionPanel>Uncoded Patient List</SelectionPanel>
+      <PspList
+        rows={rows}
+        leftColumns={leftColumns}
+        rightColumns={rightColumns}
+        sortOptions={sortOptions}
+        defaultSortIndex={2}
+        onPatientSelect={onPatientSelect}
+      />
+    </>
   );
 }

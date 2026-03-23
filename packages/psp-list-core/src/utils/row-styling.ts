@@ -38,7 +38,7 @@ export interface ResolveColorSchemeInput {
  *   isNonDefaultWard,
  *   nonDefaultWardAltColor: pspParams.psp_non_default_ward_alt_color === 'Y',
  * });
- * <PspList.DualGrid colorScheme={scheme} />
+ * <PspList colorScheme={scheme} ... />
  * ```
  */
 export function resolveColorScheme(

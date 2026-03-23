@@ -1,7 +1,7 @@
 import React from 'react';
 import type { GridColDef } from '@mui/x-data-grid-pro';
-import { PspList } from '@psp/core';
-import type { GopcPatientRecord, PspListConfig, SortOption } from '@psp/core';
+import { PspList, SelectionPanel } from '@psp/core';
+import type { GopcPatientRecord, SortOption } from '@psp/core';
 import { useListData } from '../hooks/useListData';
 
 const leftColumns: GridColDef[] = [
@@ -51,12 +51,6 @@ const sortOptions: SortOption[] = [
   ]},
 ];
 
-const config: PspListConfig = {
-  sortOptions,
-  defaultSortIndex: 0,
-  selectionMode: 'hkidSearch',
-};
-
 interface List2Props {
   params: Record<string, string>;
   onPatientSelect: (patient: GopcPatientRecord) => void;
@@ -70,13 +64,17 @@ export function List2MsGopc({ params, onPatientSelect }: List2Props): React.Reac
   });
 
   return (
-    <PspList rows={rows} config={config} onPatientSelect={onPatientSelect}>
-      <PspList.SelectionPanel>
-        <span>MS GOPC Appointment List</span>
-      </PspList.SelectionPanel>
-      <PspList.SortMenu sortLabels={sortOptions.map((s) => s.label)}>
-        <PspList.DualGrid leftColumns={leftColumns} rightColumns={rightColumns} />
-      </PspList.SortMenu>
-    </PspList>
+    <>
+      <SelectionPanel>MS GOPC Appointment List</SelectionPanel>
+      <PspList
+        rows={rows}
+        leftColumns={leftColumns}
+        rightColumns={rightColumns}
+        sortOptions={sortOptions}
+        defaultSortIndex={0}
+        selectionMode="hkidSearch"
+        onPatientSelect={onPatientSelect}
+      />
+    </>
   );
 }

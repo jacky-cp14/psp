@@ -1,7 +1,7 @@
 import React from 'react';
 import type { GridColDef } from '@mui/x-data-grid-pro';
-import { PspList } from '@psp/core';
-import type { NormalPatientRecord, PspListConfig, SortOption } from '@psp/core';
+import { PspList, SelectionPanel } from '@psp/core';
+import type { NormalPatientRecord, SortOption } from '@psp/core';
 import { useListData } from '../hooks/useListData';
 
 const leftColumns: GridColDef[] = [
@@ -75,11 +75,6 @@ const sortOptions: SortOption[] = [
   ]},
 ];
 
-const config: PspListConfig = {
-  sortOptions,
-  defaultSortIndex: 8,
-};
-
 interface List8Props {
   params: Record<string, string>;
   onPatientSelect: (patient: NormalPatientRecord) => void;
@@ -93,13 +88,16 @@ export function List8ActiveMo({ params, onPatientSelect }: List8Props): React.Re
   });
 
   return (
-    <PspList rows={rows} config={config} onPatientSelect={onPatientSelect}>
-      <PspList.SelectionPanel>
-        <span>Active Patient by MO/Specialist</span>
-      </PspList.SelectionPanel>
-      <PspList.SortMenu sortLabels={sortOptions.map((s) => s.label)}>
-        <PspList.DualGrid leftColumns={leftColumns} rightColumns={rightColumns} />
-      </PspList.SortMenu>
-    </PspList>
+    <>
+      <SelectionPanel>Active Patient by MO/Specialist</SelectionPanel>
+      <PspList
+        rows={rows}
+        leftColumns={leftColumns}
+        rightColumns={rightColumns}
+        sortOptions={sortOptions}
+        defaultSortIndex={8}
+        onPatientSelect={onPatientSelect}
+      />
+    </>
   );
 }

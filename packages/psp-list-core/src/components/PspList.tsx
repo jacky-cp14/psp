@@ -1,40 +1,72 @@
 import React, { useState, useMemo, useCallback } from 'react';
 import { ThemeProvider } from '@mui/material/styles';
+import type { GridColDef, GridRowId, GridRowParams, GridSortModel } from '@mui/x-data-grid-pro';
 import { pspTheme } from '../theme';
 import type { PatientRecord } from '../types/patient-record';
-import type { PspListConfig } from '../types/list-config';
+import type { SelectionMode } from '../types/list-config';
+import type { SortOption } from '../utils/sort-comparators';
+import type { RowColorScheme } from '../utils/row-styling';
 import type { PspListContextValue } from '../context/PspListContext';
 import { PspListProvider } from '../context/PspListContext';
 import { useSort } from '../hooks/useSort';
 import { usePatientSelection } from '../hooks/usePatientSelection';
 import { DualGrid } from './DualGrid';
-import { SelectionPanel } from './SelectionPanel';
 import { SortMenu } from './SortMenu';
-import { PrintDialog } from './PrintDialog';
-import type { GridRowId, GridSortModel } from '@mui/x-data-grid-pro';
 
 export interface PspListProps<T extends PatientRecord = PatientRecord> {
-  /** Patient rows — consumer fetches (via useListData) and optionally filters before passing in. */
+  /** Patient rows — consumer fetches and optionally filters before passing in. */
   rows: T[];
-  config: PspListConfig;
+  /** Left grid columns (patient identifiers). */
+  leftColumns: GridColDef[];
+  /** Right grid columns (clinical details). */
+  rightColumns: GridColDef[];
+  /** Sort presets for the right-click context menu. */
+  sortOptions: SortOption[];
+  /** Index into sortOptions for initial sort. null = preserve server order. */
+  defaultSortIndex?: number | null;
+  /** Called on double-click or Enter — the "submit" action. */
   onPatientSelect: (patient: T) => void;
-  children: React.ReactNode;
+  /** Initial left/right panel split percentage. */
+  defaultSplit?: number;
+  /** Row height in px (default 28). */
+  rowHeight?: number;
+  /** Alternating row color scheme (default 'gray'). */
+  colorScheme?: RowColorScheme;
+  /** Custom row class names (composed with library color classes). */
+  getRowClassName?: (params: GridRowParams) => string;
+  /** Page size for PgUp/PgDn (default 12). */
+  pageSize?: number;
+  /** Selection mode — affects empty-episode behavior. */
+  selectionMode?: SelectionMode;
 }
 
 /**
- * Pure UI compound component. Handles sorting, selection, and layout.
- * Data fetching and filtering are the consumer's responsibility.
- * Sub-components: PspList.DualGrid, PspList.SelectionPanel, PspList.SortMenu, PspList.PrintDialog
+ * Flat, prop-driven patient list — mirrors MUI DataGrid's API contract:
+ * data in, UI out, callbacks for interaction.
+ *
+ * Internally composes SortMenu (right-click context menu) and
+ * DualGrid (split DataGridPro pair with keyboard nav).
+ *
+ * Toolbar/title is the consumer's layout concern — use `SelectionPanel`
+ * above `PspList` for the standard toolbar look.
  */
-function PspListRoot<T extends PatientRecord>({
+export function PspList<T extends PatientRecord>({
   rows,
-  config,
+  leftColumns,
+  rightColumns,
+  sortOptions,
+  defaultSortIndex = null,
   onPatientSelect,
-  children,
+  defaultSplit,
+  rowHeight,
+  colorScheme,
+  getRowClassName,
+  pageSize: _pageSize,
+  selectionMode: _selectionMode,
 }: PspListProps<T>): React.ReactElement {
   const { currentSortIndex, setSortIndex, sortRows } = useSort<PatientRecord>(
-    config.sortOptions,
-    config.defaultSortIndex,
+    sortOptions,
+    defaultSortIndex,
   );
 
   const [sortModel, setSortModel] = useState<GridSortModel>([]);
@@ -87,18 +119,23 @@ function PspListRoot<T extends PatientRecord>({
     ],
   );
 
+  const sortLabels = useMemo(() => sortOptions.map((s) => s.label), [sortOptions]);
+
   return (
     <ThemeProvider theme={pspTheme}>
       <PspListProvider value={contextValue}>
-        {children}
+        <SortMenu sortLabels={sortLabels}>
+          <DualGrid
+            leftColumns={leftColumns}
+            rightColumns={rightColumns}
+            defaultSplit={defaultSplit}
+            rowHeight={rowHeight}
+            colorScheme={colorScheme}
+            getRowClassName={getRowClassName}
+            onRowDoubleClick={onPatientSubmit}
+          />
+        </SortMenu>
       </PspListProvider>
     </ThemeProvider>
   );
 }
-
-export const PspList = Object.assign(PspListRoot, {
-  DualGrid,
-  SelectionPanel,
-  SortMenu,
-  PrintDialog,
-});

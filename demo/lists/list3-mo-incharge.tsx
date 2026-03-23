@@ -1,7 +1,7 @@
 import React from 'react';
 import type { GridColDef } from '@mui/x-data-grid-pro';
-import { PspList } from '@psp/core';
-import type { MoInChargePatientRecord, PspListConfig, SortOption } from '@psp/core';
+import { PspList, SelectionPanel } from '@psp/core';
+import type { MoInChargePatientRecord, SortOption } from '@psp/core';
 import { useListData } from '../hooks/useListData';
 
 const leftColumns: GridColDef[] = [
@@ -76,12 +76,6 @@ const sortOptions: SortOption[] = [
   ]},
 ];
 
-const config: PspListConfig = {
-  sortOptions,
-  defaultSortIndex: 1,
-  pageSize: 7,
-};
-
 interface List3Props {
   params: Record<string, string>;
   onPatientSelect: (patient: MoInChargePatientRecord) => void;
@@ -95,13 +89,17 @@ export function List3MoInCharge({ params, onPatientSelect }: List3Props): React.
   });
 
   return (
-    <PspList rows={rows} config={config} onPatientSelect={onPatientSelect}>
-      <PspList.SelectionPanel>
-        <span>MO In-Charge Patient List</span>
-      </PspList.SelectionPanel>
-      <PspList.SortMenu sortLabels={sortOptions.map((s) => s.label)}>
-        <PspList.DualGrid leftColumns={leftColumns} rightColumns={rightColumns} />
-      </PspList.SortMenu>
-    </PspList>
+    <>
+      <SelectionPanel>MO In-Charge Patient List</SelectionPanel>
+      <PspList
+        rows={rows}
+        leftColumns={leftColumns}
+        rightColumns={rightColumns}
+        sortOptions={sortOptions}
+        defaultSortIndex={1}
+        pageSize={7}
+        onPatientSelect={onPatientSelect}
+      />
+    </>
   );
 }
