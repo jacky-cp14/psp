@@ -4,6 +4,7 @@
   "scripts": {
     "dev": "pnpm --filter psp-demo dev",
     "build": "pnpm --filter @psp/core build",
+    "preview:demo": "pnpm build:demo && pnpm --filter psp-demo preview",
     "build:demo": "pnpm --filter psp-demo build",
     "test": "pnpm --filter @psp/core test && pnpm --filter psp-demo test",
     "test:core": "pnpm --filter @psp/core test",
