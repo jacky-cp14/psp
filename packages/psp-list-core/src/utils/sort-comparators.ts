@@ -35,7 +35,10 @@ function toNum(v: unknown): number {
 }
 
 function toTimestamp(v: unknown): number {
-  if (v instanceof Date) return v.getTime();
+  if (v instanceof Date) {
+    const t = v.getTime();
+    return Number.isFinite(t) ? t : 0;
+  }
   if (typeof v === 'string' && v !== '') {
     const t = Date.parse(v.replace(' ', 'T'));
     return Number.isFinite(t) ? t : 0;
@@ -47,6 +50,12 @@ function toTimestamp(v: unknown): number {
 // Core compare
 // ---------------------------------------------------------------------------
 
+function cmpNum(a: number, b: number): number {
+  if (a < b) return -1;
+  if (a > b) return 1;
+  return 0;
+}
+
 function compareValues(
   a: unknown,
   b: unknown,
@@ -54,9 +63,9 @@ function compareValues(
 ): number {
   switch (type) {
     case 'numeric':
-      return toNum(a) - toNum(b);
+      return cmpNum(toNum(a), toNum(b));
     case 'date':
-      return toTimestamp(a) - toTimestamp(b);
+      return cmpNum(toTimestamp(a), toTimestamp(b));
     default:
       return toStr(a).localeCompare(toStr(b));
   }
@@ -66,7 +75,22 @@ function compareValues(
 // Public API
 // ---------------------------------------------------------------------------
 
-/** Builds a comparator from an ordered array of sort key descriptors. */
+/**
+ * Creates a multi-key comparator for `Array.prototype.sort`.
+ *
+ * Keys are evaluated in priority order: the first key whose values differ
+ * decides the outcome. Each key specifies a `field` to read from the object,
+ * a `direction` (`ASC` | `DESC`), and an optional `type` that controls value
+ * projection (`'string'` locale compare, `'numeric'`, or `'date'` timestamp).
+ * Returns `0` when all keys compare equal, preserving relative order.
+ *
+ * @example
+ * const cmp = buildComparator([
+ *   { field: 'priority', direction: 'ASC', type: 'numeric' },
+ *   { field: 'name',     direction: 'ASC' },
+ * ]);
+ * rows.sort(cmp); // primary: priority ↑, tiebreaker: name A-Z
+ */
 export function buildComparator<T = Record<string, unknown>>(
   keys: SortKey[],
 ): (a: T, b: T) => number {
