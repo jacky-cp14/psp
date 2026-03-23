@@ -1,7 +1,8 @@
 import React from 'react';
 import type { GridColDef } from '@mui/x-data-grid-pro';
 import { PspList, SelectionPanel } from '@psp/core';
-import type { GopcPatientRecord, SortOption } from '@psp/core';
+import type { SortOption } from '@psp/core';
+import type { GopcPatientRecord } from '../types/patient-record';
 import { useListData } from '../hooks/useListData';
 
 const leftColumns: GridColDef[] = [
@@ -72,7 +73,6 @@ export function List7Gopc({ params, onPatientSelect }: List7Props): React.ReactE
         rightColumns={rightColumns}
         sortOptions={sortOptions}
         defaultSortIndex={0}
-        selectionMode="hkidSearch"
         onPatientSelect={onPatientSelect}
       />
     </>

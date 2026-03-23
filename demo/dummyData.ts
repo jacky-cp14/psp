@@ -10,7 +10,7 @@ import type {
   NormalPatientRecord,
   OpPatientRecord,
   UncodedPatientRecord,
-} from '@psp/core';
+} from './types/patient-record';
 
 const ROW_COUNT = 200;
 

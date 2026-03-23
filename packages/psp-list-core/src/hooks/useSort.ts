@@ -1,10 +1,8 @@
 import { useState, useCallback, useMemo } from 'react';
-import type { PatientRecord } from '../types/patient-record';
-import type { SortOption } from '../types/list-config';
-import type { FieldTypeMap } from '../utils/sort-comparators';
+import type { SortOption, FieldTypeMap } from '../utils/sort-comparators';
 import { buildComparator } from '../utils/sort-comparators';
 
-export interface UseSortReturn<T extends PatientRecord> {
+export interface UseSortReturn<T extends { id: string }> {
   /** Current active sort index, or null when unsorted. */
   currentSortIndex: number | null;
   /** Set the active sort index. Pass null for no sort. */
@@ -14,7 +12,7 @@ export interface UseSortReturn<T extends PatientRecord> {
   sortOptions: SortOption[];
 }
 
-export function useSort<T extends PatientRecord>(
+export function useSort<T extends { id: string }>(
   options: SortOption[],
   defaultIndex: number | null = 0,
   fieldTypes?: FieldTypeMap,

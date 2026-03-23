@@ -1,10 +1,9 @@
 import { useState, useCallback, useRef, useMemo } from 'react';
 import type { GridRowId } from '@mui/x-data-grid-pro';
-import type { PatientRecord } from '../types/patient-record';
 
-export interface UsePatientSelectionConfig {
-  rows: PatientRecord[];
-  onPatientSelect: (patient: PatientRecord) => void;
+export interface UsePatientSelectionConfig<T extends { id: string }> {
+  rows: T[];
+  onPatientSelect: (patient: T) => void;
   debounceMs?: number;
 }
 
@@ -21,8 +20,8 @@ export interface UsePatientSelectionReturn {
  * Double-click or ENTER = submit (calls onPatientSelect with debounce).
  * Debounce default 1000ms matches original ExtJS dblclick behavior.
  */
-export function usePatientSelection(
-  config: UsePatientSelectionConfig,
+export function usePatientSelection<T extends { id: string }>(
+  config: UsePatientSelectionConfig<T>,
 ): UsePatientSelectionReturn {
   const { rows, onPatientSelect, debounceMs = 1000 } = config;
   const [selectedRowId, setSelectedRowId] = useState<GridRowId | null>(null);

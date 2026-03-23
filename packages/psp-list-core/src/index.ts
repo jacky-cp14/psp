@@ -1,29 +1,24 @@
 /**
- * @psp/core — PSP Patient List React Library
+ * @psp/core — PSP List React Library
  *
  * MUI DataGrid extension: compound components, hooks, and utilities
- * for the dual-grid patient list layout.
+ * for the dual-grid list layout.
  */
 
-// Types
-export type {
-  BasePatientRecord,
-  NormalPatientRecord,
-  UncodedPatientRecord,
-  GopcPatientRecord,
-  MoInChargePatientRecord,
-  OpPatientRecord,
-  ActiveTeamPatientRecord,
-  PatientRecord,
-} from './types/patient-record';
-export type {
-  PspListConfig,
-  SelectionMode,
-} from './types/list-config';
-export type {
-  PspGridColDef,
-  GridRowId,
-} from './types/grid';
+import type { GridRowId } from '@mui/x-data-grid-pro';
+import type { SortOption } from './utils/sort-comparators';
+
+export type { GridRowId };
+
+/** UI configuration for a PSP list screen. */
+export interface PspListConfig {
+  /** Sort options for the context menu */
+  sortOptions: SortOption[];
+  /** Default sort option index. null = no sort (preserve server order). */
+  defaultSortIndex: number | null;
+  /** Page size for PGUP/PGDN (default 12, list 3 uses 7) */
+  pageSize?: number;
+}
 
 // Context
 export {

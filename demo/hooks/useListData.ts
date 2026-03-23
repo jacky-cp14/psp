@@ -1,6 +1,5 @@
 import { useCallback, useMemo } from 'react';
 import { useQuery, useQueryClient } from '@tanstack/react-query';
-import type { PatientRecord } from '@psp/core';
 
 export interface UseListDataConfig {
   servletUrl: string;
@@ -9,7 +8,7 @@ export interface UseListDataConfig {
   enabled?: boolean;
 }
 
-export interface UseListDataReturn<T extends PatientRecord> {
+export interface UseListDataReturn<T extends { id: string }> {
   rows: T[];
   isLoading: boolean;
   error: Error | null;
@@ -18,7 +17,7 @@ export interface UseListDataReturn<T extends PatientRecord> {
   totalCount: number;
 }
 
-async function fetchListData<T extends PatientRecord>(
+async function fetchListData<T extends { id: string }>(
   servletUrl: string,
   dataRoot: string,
   params: Record<string, string>,
@@ -39,7 +38,7 @@ async function fetchListData<T extends PatientRecord>(
  * TanStack Query wrapper replacing Ext.data.Store + HttpProxy.
  * queryKey derived from URL + params ensures automatic cache invalidation.
  */
-export function useListData<T extends PatientRecord>(
+export function useListData<T extends { id: string }>(
   config: UseListDataConfig,
 ): UseListDataReturn<T> {
   const { servletUrl, dataRoot, params, enabled = true } = config;

@@ -1,9 +1,7 @@
 import React, { useState, useMemo, useCallback } from 'react';
 import { ThemeProvider } from '@mui/material/styles';
 import type { GridColDef, GridRowId, GridRowParams, GridSortModel } from '@mui/x-data-grid-pro';
-import { pspTheme } from '../theme';
-import type { PatientRecord } from '../types/patient-record';
-import type { SelectionMode } from '../types/list-config';
+import { pspTheme } from '../theme/pspTheme';
 import type { SortOption } from '../utils/sort-comparators';
 import { buildFieldTypeMap } from '../utils/sort-comparators';
 import type { RowColorScheme } from '../utils/row-styling';
@@ -14,12 +12,12 @@ import { usePatientSelection } from '../hooks/usePatientSelection';
 import { DualGrid } from './DualGrid';
 import { SortMenu } from './SortMenu';
 
-export interface PspListProps<T extends PatientRecord = PatientRecord> {
-  /** Patient rows — consumer fetches and optionally filters before passing in. */
+export interface PspListProps<T extends { id: string } = { id: string }> {
+  /** Rows — consumer fetches and optionally filters before passing in. */
   rows: T[];
-  /** Left grid columns (patient identifiers). */
+  /** Left grid columns (identifiers). */
   leftColumns: GridColDef[];
-  /** Right grid columns (clinical details). */
+  /** Right grid columns (details). */
   rightColumns: GridColDef[];
   /** Sort presets for the right-click context menu. */
   sortOptions: SortOption[];
@@ -37,12 +35,10 @@ export interface PspListProps<T extends PatientRecord = PatientRecord> {
   getRowClassName?: (params: GridRowParams) => string;
   /** Page size for PgUp/PgDn (default 12). */
   pageSize?: number;
-  /** Selection mode — affects empty-episode behavior. */
-  selectionMode?: SelectionMode;
 }
 
 /**
- * Flat, prop-driven patient list — mirrors MUI DataGrid's API contract:
+ * Flat, prop-driven list — mirrors MUI DataGrid's API contract:
  * data in, UI out, callbacks for interaction.
  *
  * Internally composes SortMenu (right-click context menu) and
@@ -51,7 +47,7 @@ export interface PspListProps<T extends PatientRecord = PatientRecord> {
  * Toolbar/title is the consumer's layout concern — use `SelectionPanel`
  * above `PspList` for the standard toolbar look.
  */
-export function PspList<T extends PatientRecord>({
+export function PspList<T extends { id: string }>({
   rows,
   leftColumns,
   rightColumns,
@@ -63,14 +59,13 @@ export function PspList<T extends PatientRecord>({
   colorScheme,
   getRowClassName,
   pageSize: _pageSize,
-  selectionMode: _selectionMode,
 }: PspListProps<T>): React.ReactElement {
   const fieldTypes = useMemo(
     () => buildFieldTypeMap([...leftColumns, ...rightColumns]),
     [leftColumns, rightColumns],
   );
 
-  const { currentSortIndex, setSortIndex, sortRows } = useSort<PatientRecord>(
+  const { currentSortIndex, setSortIndex, sortRows } = useSort<T>(
     sortOptions,
     defaultSortIndex,
     fieldTypes,
@@ -79,11 +74,10 @@ export function PspList<T extends PatientRecord>({
   const [sortModel, setSortModel] = useState<GridSortModel>([]);
 
   const processedRows = useMemo(() => {
-    const inputRows = rows as PatientRecord[];
     if (sortModel.length > 0) {
-      return inputRows;
+      return rows;
     }
-    return sortRows(inputRows);
+    return sortRows(rows);
   }, [rows, sortRows, sortModel.length]);
 
   const handleSetSortIndex = useCallback(
@@ -94,9 +88,9 @@ export function PspList<T extends PatientRecord>({
     [setSortIndex],
   );
 
-  const { selectedRowId, setSelectedRowId, onPatientSubmit } = usePatientSelection({
+  const { selectedRowId, setSelectedRowId, onPatientSubmit } = usePatientSelection<T>({
     rows: processedRows,
-    onPatientSelect: onPatientSelect as (p: PatientRecord) => void,
+    onPatientSelect,
   });
 
   const [langMode, setLangMode] = useState<0 | 1>(0);

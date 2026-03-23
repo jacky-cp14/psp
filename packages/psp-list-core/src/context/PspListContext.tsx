@@ -1,10 +1,9 @@
 import React, { createContext, useContext } from 'react';
-import type { PatientRecord } from '../types/patient-record';
 import type { GridRowId, GridSortModel } from '@mui/x-data-grid-pro';
 
 export interface PspListContextValue {
   /** Sorted rows ready for rendering */
-  rows: PatientRecord[];
+  rows: { id: string }[];
   /** Currently selected row ID (null if none) */
   selectedRowId: GridRowId | null;
   /** Current sort option index (context menu), or null when unsorted */

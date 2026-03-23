@@ -1,7 +1,8 @@
 import React from 'react';
 import type { GridColDef } from '@mui/x-data-grid-pro';
 import { PspList, SelectionPanel } from '@psp/core';
-import type { ActiveTeamPatientRecord, SortOption } from '@psp/core';
+import type { SortOption } from '@psp/core';
+import type { ActiveTeamPatientRecord } from '../types/patient-record';
 import { useListData } from '../hooks/useListData';
 
 const leftColumns: GridColDef[] = [
