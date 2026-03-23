@@ -58,7 +58,7 @@ export function resolveColorScheme(
 
 // --- Internals: CSS class names + colors ---
 
-const CLS = {
+export const ROW_CLASSES = {
   yellowEven: 'psp-row-yellow',
   yellowOdd: 'psp-row-yellow-alt',
   grayEven: 'psp-row-gray',
@@ -69,36 +69,25 @@ const CLS = {
   ndwAlt: 'psp-row-ndw-alt',
 } as const;
 
-export { CLS as ROW_CLASSES };
+/** Scheme → [evenClass, oddClass]. Ward-highlight uses the same class for both. */
+const SCHEME_CLASSES: Record<Exclude<RowColorScheme, 'none'>, readonly [string, string]> = {
+  yellow:               [ROW_CLASSES.yellowEven, ROW_CLASSES.yellowOdd],
+  gray:                 [ROW_CLASSES.grayEven,   ROW_CLASSES.grayOdd],
+  blue:                 [ROW_CLASSES.blueEven,   ROW_CLASSES.blueOdd],
+  'ward-highlight':     [ROW_CLASSES.ndw,        ROW_CLASSES.ndw],
+  'ward-highlight-alt': [ROW_CLASSES.ndw,        ROW_CLASSES.ndwAlt],
+};
 
-const COLORS = {
+export const ROW_COLORS = {
   yellow: tokens.color.row.yellow,
   gray: tokens.color.row.gray,
   blue: tokens.color.row.blue,
   ndw: { base: tokens.color.row.ndw.base, alt: tokens.color.row.ndw.alt },
 } as const;
 
-export { COLORS as ROW_COLORS };
-
 /** Returns the CSS class for a given row index and color scheme. */
-export function getRowClass(
-  index: number,
-  scheme: RowColorScheme | undefined,
-): string {
+export function getRowClass(index: number, scheme: RowColorScheme | undefined): string {
   if (!scheme || scheme === 'none') return '';
-
-  const isEven = index % 2 === 0;
-  switch (scheme) {
-    case 'yellow':
-      return isEven ? CLS.yellowEven : CLS.yellowOdd;
-    case 'gray':
-      return isEven ? CLS.grayEven : CLS.grayOdd;
-    case 'blue':
-      return isEven ? CLS.blueEven : CLS.blueOdd;
-    case 'ward-highlight':
-      return CLS.ndw;
-    case 'ward-highlight-alt':
-      return isEven ? CLS.ndw : CLS.ndwAlt;
-  }
+  const [even, odd] = SCHEME_CLASSES[scheme];
+  return index % 2 === 0 ? even : odd;
 }
-
