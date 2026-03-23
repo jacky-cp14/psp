@@ -3,7 +3,7 @@ import type { GridColDef } from '@mui/x-data-grid-pro';
 import { PspList } from '../../src/components/PspList';
 import type { PspListConfig } from '../../src/types/list-config';
 import type { GopcPatientRecord } from '../../src/types/patient-record';
-import { gopcSortOptions } from '../../src/utils/sort-comparators';
+import type { SortOption } from '../../src/utils/sort-comparators';
 
 const leftColumns: GridColDef[] = [
   { field: 'slotDatetime', headerName: 'Slot Date/Time', width: 190 },
@@ -26,10 +26,36 @@ const rightColumns: GridColDef[] = [
   { field: 'mrn', headerName: 'MRN', width: 170 },
 ];
 
-const config: PspListConfig<GopcPatientRecord> = {
+const sortOptions: SortOption[] = [
+  { label: 'By Slot Date/Time, Priority', keys: [
+    { field: 'slotDatetime', direction: 'ASC', type: 'date' },
+    { field: 'priorityValue', direction: 'ASC', type: 'numeric' },
+    { field: 'type', direction: 'ASC' },
+  ]},
+  { label: 'By Name, Slot Date/Time', keys: [
+    { field: 'name', direction: 'ASC' },
+    { field: 'slotDatetime', direction: 'ASC', type: 'date' },
+    { field: 'priorityValue', direction: 'ASC', type: 'numeric' },
+    { field: 'type', direction: 'ASC' },
+  ]},
+  { label: 'By Case No, Slot Date/Time', keys: [
+    { field: 'episode', direction: 'ASC' },
+    { field: 'slotDatetime', direction: 'ASC', type: 'date' },
+    { field: 'priorityValue', direction: 'ASC', type: 'numeric' },
+    { field: 'type', direction: 'ASC' },
+  ]},
+  { label: 'By HKID, Slot Date/Time', keys: [
+    { field: 'hkid', direction: 'ASC' },
+    { field: 'slotDatetime', direction: 'ASC', type: 'date' },
+    { field: 'priorityValue', direction: 'ASC', type: 'numeric' },
+    { field: 'type', direction: 'ASC' },
+  ]},
+];
+
+const config: PspListConfig = {
   servletUrl: 'msgopcservlet',
   dataRoot: 'msGopcPatList',
-  sortOptions: gopcSortOptions,
+  sortOptions,
   defaultSortIndex: 0,
   selectionMode: 'hkidSearch',
 };
@@ -45,7 +71,7 @@ export function List2MsGopc({ params, onPatientSelect }: List2Props): React.Reac
       <PspList.SelectionPanel>
         <span>MS GOPC Appointment List</span>
       </PspList.SelectionPanel>
-      <PspList.SortMenu sortLabels={gopcSortOptions.map((s) => s.label)}>
+      <PspList.SortMenu sortLabels={sortOptions.map((s) => s.label)}>
         <PspList.DualGrid leftColumns={leftColumns} rightColumns={rightColumns} />
       </PspList.SortMenu>
     </PspList>

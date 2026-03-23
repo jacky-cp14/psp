@@ -3,7 +3,7 @@ import type { GridColDef } from '@mui/x-data-grid-pro';
 import { PspList } from '../../src/components/PspList';
 import type { PspListConfig } from '../../src/types/list-config';
 import type { NormalPatientRecord } from '../../src/types/patient-record';
-import { activeMoSortOptions } from '../../src/utils/sort-comparators';
+import type { SortOption } from '../../src/utils/sort-comparators';
 
 const leftColumns: GridColDef[] = [
   { field: 'wardCode', headerName: 'Ward', width: 65 },
@@ -21,10 +21,65 @@ const rightColumns: GridColDef[] = [
   { field: 'hkid', headerName: 'HKID', width: 124 },
 ];
 
-const config: PspListConfig<NormalPatientRecord> = {
+const sortOptions: SortOption[] = [
+  { label: 'By Admission Date/Time', keys: [
+    { field: 'admissionDtm', direction: 'ASC', type: 'date' },
+    { field: 'wardCode', direction: 'ASC' },
+    { field: 'bedNo', direction: 'ASC' },
+    { field: 'name', direction: 'ASC' },
+  ]},
+  { label: 'By Case No.', keys: [
+    { field: 'caseNo', direction: 'ASC' },
+    { field: 'wardCode', direction: 'ASC' },
+    { field: 'bedNo', direction: 'ASC' },
+    { field: 'name', direction: 'ASC' },
+  ]},
+  { label: 'By HKID', keys: [
+    { field: 'hkid', direction: 'ASC' },
+    { field: 'wardCode', direction: 'ASC' },
+    { field: 'bedNo', direction: 'ASC' },
+    { field: 'name', direction: 'ASC' },
+  ]},
+  { label: 'By Name, Bed', keys: [
+    { field: 'name', direction: 'ASC' },
+    { field: 'wardCode', direction: 'ASC' },
+    { field: 'bedNo', direction: 'ASC' },
+  ]},
+  { label: 'By Source Hospital', keys: [
+    { field: 'sourceCode', direction: 'ASC' },
+    { field: 'wardCode', direction: 'ASC' },
+    { field: 'bedNo', direction: 'ASC' },
+    { field: 'name', direction: 'ASC' },
+  ]},
+  { label: 'By Specialty', keys: [
+    { field: 'specCode', direction: 'ASC' },
+    { field: 'wardCode', direction: 'ASC' },
+    { field: 'bedNo', direction: 'ASC' },
+    { field: 'name', direction: 'ASC' },
+  ]},
+  { label: 'By Source Hospital, Specialty', keys: [
+    { field: 'sourceCode', direction: 'ASC' },
+    { field: 'specCode', direction: 'ASC' },
+    { field: 'wardCode', direction: 'ASC' },
+    { field: 'bedNo', direction: 'ASC' },
+    { field: 'name', direction: 'ASC' },
+  ]},
+  { label: 'By Ward, Bed, Name', keys: [
+    { field: 'wardCode', direction: 'ASC' },
+    { field: 'bedNo', direction: 'ASC' },
+    { field: 'name', direction: 'ASC' },
+  ]},
+  { label: 'By Ward, Bed, Specialty', keys: [
+    { field: 'wardCode', direction: 'ASC' },
+    { field: 'bedNo', direction: 'ASC' },
+    { field: 'specCode', direction: 'ASC' },
+  ]},
+];
+
+const config: PspListConfig = {
   servletUrl: 'activemoservlet',
   dataRoot: 'cpiActiveMoPatList',
-  sortOptions: activeMoSortOptions,
+  sortOptions,
   defaultSortIndex: 8,
 };
 
@@ -39,7 +94,7 @@ export function List8ActiveMo({ params, onPatientSelect }: List8Props): React.Re
       <PspList.SelectionPanel>
         <span>Active Patient by MO/Specialist</span>
       </PspList.SelectionPanel>
-      <PspList.SortMenu sortLabels={activeMoSortOptions.map((s) => s.label)}>
+      <PspList.SortMenu sortLabels={sortOptions.map((s) => s.label)}>
         <PspList.DualGrid leftColumns={leftColumns} rightColumns={rightColumns} />
       </PspList.SortMenu>
     </PspList>

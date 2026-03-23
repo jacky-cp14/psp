@@ -22,7 +22,6 @@ export type {
 } from './types/psp-params';
 export type {
   PspListConfig,
-  SortOption,
   SelectionMode,
   FilterState,
 } from './types/list-config';
@@ -78,19 +77,18 @@ export {
   diffInSeconds,
   diffInMinutes,
 } from './utils/date-utils';
-export {
-  buildComparator,
-  normalSortOptions,
-  uncodedSortOptions,
-  gopcSortOptions,
-  moInChargeSortOptions,
-  opSortOptions,
-  userGroupSortOptions,
-  absentSortOptions,
-  activeMoSortOptions,
-  activeTeamSortOptions,
+export { buildComparator } from './utils/sort-comparators';
+export type {
+  SortDirection,
+  SortFieldType,
+  SortKey,
+  SortOption,
 } from './utils/sort-comparators';
 
 // Row styling
 export type { RowColorScheme, ResolveColorSchemeInput } from './utils/row-styling';
 export { resolveColorScheme, ROW_COLORS } from './utils/row-styling';
+
+// Theme
+export { tokens } from './theme/pspTokens';
+export { pspTheme } from './theme/pspTheme';

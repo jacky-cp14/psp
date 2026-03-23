@@ -3,7 +3,7 @@ import type { GridColDef } from '@mui/x-data-grid-pro';
 import { PspList } from '../../src/components/PspList';
 import type { PspListConfig } from '../../src/types/list-config';
 import type { UncodedPatientRecord } from '../../src/types/patient-record';
-import { uncodedSortOptions } from '../../src/utils/sort-comparators';
+import type { SortOption } from '../../src/utils/sort-comparators';
 
 const leftColumns: GridColDef[] = [
   { field: 'bed', headerName: 'Bed', width: 100 },
@@ -21,10 +21,60 @@ const rightColumns: GridColDef[] = [
   { field: 'hkid', headerName: 'HKID', width: 124 },
 ];
 
-const config: PspListConfig<UncodedPatientRecord> = {
+const sortOptions: SortOption[] = [
+  { label: 'By Admission Date/Time', keys: [
+    { field: 'admissionDtm', direction: 'ASC', type: 'date' },
+    { field: 'wardCode', direction: 'ASC' },
+    { field: 'bedNo', direction: 'ASC' },
+    { field: 'name', direction: 'ASC' },
+  ]},
+  { label: 'By Case No.', keys: [
+    { field: 'caseNo', direction: 'ASC' },
+    { field: 'wardCode', direction: 'ASC' },
+    { field: 'bedNo', direction: 'ASC' },
+    { field: 'name', direction: 'ASC' },
+  ]},
+  { label: 'By Discharge Date/Time', keys: [
+    { field: 'dischargeDtm', direction: 'DESC', type: 'date' },
+    { field: 'bedNo', direction: 'ASC' },
+    { field: 'name', direction: 'ASC' },
+  ]},
+  { label: 'By HKID', keys: [
+    { field: 'hkid', direction: 'ASC' },
+    { field: 'wardCode', direction: 'ASC' },
+    { field: 'bedNo', direction: 'ASC' },
+    { field: 'name', direction: 'ASC' },
+  ]},
+  { label: 'By Name, Bed', keys: [
+    { field: 'name', direction: 'ASC' },
+    { field: 'wardCode', direction: 'ASC' },
+    { field: 'bedNo', direction: 'ASC' },
+  ]},
+  { label: 'By Source Hospital', keys: [
+    { field: 'sourceCode', direction: 'ASC' },
+    { field: 'wardCode', direction: 'ASC' },
+    { field: 'bedNo', direction: 'ASC' },
+    { field: 'name', direction: 'ASC' },
+  ]},
+  { label: 'By Specialty', keys: [
+    { field: 'specCode', direction: 'ASC' },
+    { field: 'wardCode', direction: 'ASC' },
+    { field: 'bedNo', direction: 'ASC' },
+    { field: 'name', direction: 'ASC' },
+  ]},
+  { label: 'By Source Hospital, Specialty', keys: [
+    { field: 'sourceCode', direction: 'ASC' },
+    { field: 'specCode', direction: 'ASC' },
+    { field: 'wardCode', direction: 'ASC' },
+    { field: 'bedNo', direction: 'ASC' },
+    { field: 'name', direction: 'ASC' },
+  ]},
+];
+
+const config: PspListConfig = {
   servletUrl: 'uncodeservlet',
   dataRoot: 'cpiUnCodePatList',
-  sortOptions: uncodedSortOptions,
+  sortOptions,
   defaultSortIndex: 2,
 };
 
@@ -39,7 +89,7 @@ export function List1Uncoded({ params, onPatientSelect }: List1Props): React.Rea
       <PspList.SelectionPanel>
         <span>Uncoded Patient List</span>
       </PspList.SelectionPanel>
-      <PspList.SortMenu sortLabels={uncodedSortOptions.map((s) => s.label)}>
+      <PspList.SortMenu sortLabels={sortOptions.map((s) => s.label)}>
         <PspList.DualGrid leftColumns={leftColumns} rightColumns={rightColumns} />
       </PspList.SortMenu>
     </PspList>

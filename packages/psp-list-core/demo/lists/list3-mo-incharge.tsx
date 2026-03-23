@@ -3,7 +3,7 @@ import type { GridColDef } from '@mui/x-data-grid-pro';
 import { PspList } from '../../src/components/PspList';
 import type { PspListConfig } from '../../src/types/list-config';
 import type { MoInChargePatientRecord } from '../../src/types/patient-record';
-import { moInChargeSortOptions } from '../../src/utils/sort-comparators';
+import type { SortOption } from '../../src/utils/sort-comparators';
 
 const leftColumns: GridColDef[] = [
   { field: 'bed', headerName: 'Bed', width: 100 },
@@ -22,10 +22,65 @@ const rightColumns: GridColDef[] = [
   { field: 'moic', headerName: 'MO In-Charge', width: 140 },
 ];
 
-const config: PspListConfig<MoInChargePatientRecord> = {
+const sortOptions: SortOption[] = [
+  { label: 'By Admission Date/Time', keys: [
+    { field: 'admissionDtm', direction: 'ASC', type: 'date' },
+    { field: 'wardCode', direction: 'ASC' },
+    { field: 'bedNo', direction: 'ASC' },
+    { field: 'name', direction: 'ASC' },
+  ]},
+  { label: 'By Bed, Name', keys: [
+    { field: 'bedNo', direction: 'ASC' },
+    { field: 'name', direction: 'ASC' },
+  ]},
+  { label: 'By Case No.', keys: [
+    { field: 'caseNo', direction: 'ASC' },
+    { field: 'wardCode', direction: 'ASC' },
+    { field: 'bedNo', direction: 'ASC' },
+    { field: 'name', direction: 'ASC' },
+  ]},
+  { label: 'By HKID', keys: [
+    { field: 'hkid', direction: 'ASC' },
+    { field: 'wardCode', direction: 'ASC' },
+    { field: 'bedNo', direction: 'ASC' },
+    { field: 'name', direction: 'ASC' },
+  ]},
+  { label: 'By Name, Bed', keys: [
+    { field: 'name', direction: 'ASC' },
+    { field: 'wardCode', direction: 'ASC' },
+    { field: 'bedNo', direction: 'ASC' },
+  ]},
+  { label: 'By Source Hospital', keys: [
+    { field: 'sourceCode', direction: 'ASC' },
+    { field: 'wardCode', direction: 'ASC' },
+    { field: 'bedNo', direction: 'ASC' },
+    { field: 'name', direction: 'ASC' },
+  ]},
+  { label: 'By Specialty', keys: [
+    { field: 'specCode', direction: 'ASC' },
+    { field: 'wardCode', direction: 'ASC' },
+    { field: 'bedNo', direction: 'ASC' },
+    { field: 'name', direction: 'ASC' },
+  ]},
+  { label: 'By Source Hospital, Specialty', keys: [
+    { field: 'sourceCode', direction: 'ASC' },
+    { field: 'specCode', direction: 'ASC' },
+    { field: 'wardCode', direction: 'ASC' },
+    { field: 'bedNo', direction: 'ASC' },
+    { field: 'name', direction: 'ASC' },
+  ]},
+  { label: 'By MO in charge', keys: [
+    { field: 'moic', direction: 'ASC' },
+    { field: 'wardCode', direction: 'ASC' },
+    { field: 'bedNo', direction: 'ASC' },
+    { field: 'name', direction: 'ASC' },
+  ]},
+];
+
+const config: PspListConfig = {
   servletUrl: 'moinchargeservlet',
   dataRoot: 'moPatList',
-  sortOptions: moInChargeSortOptions,
+  sortOptions,
   defaultSortIndex: 1,
   pageSize: 7,
 };
@@ -41,7 +96,7 @@ export function List3MoInCharge({ params, onPatientSelect }: List3Props): React.
       <PspList.SelectionPanel>
         <span>MO In-Charge Patient List</span>
       </PspList.SelectionPanel>
-      <PspList.SortMenu sortLabels={moInChargeSortOptions.map((s) => s.label)}>
+      <PspList.SortMenu sortLabels={sortOptions.map((s) => s.label)}>
         <PspList.DualGrid leftColumns={leftColumns} rightColumns={rightColumns} />
       </PspList.SortMenu>
     </PspList>

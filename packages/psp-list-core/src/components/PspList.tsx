@@ -1,6 +1,8 @@
 import React, { useState, useMemo, useCallback } from 'react';
+import { ThemeProvider } from '@mui/material/styles';
+import { pspTheme } from '../theme';
 import type { PatientRecord } from '../types/patient-record';
-import type { PspListConfig, FilterState, SortOption } from '../types/list-config';
+import type { PspListConfig, FilterState } from '../types/list-config';
 import type { PspListContextValue } from '../context/PspListContext';
 import { PspListProvider } from '../context/PspListContext';
 import { useListData } from '../hooks/useListData';
@@ -15,7 +17,7 @@ import { PrintDialog } from './PrintDialog';
 import type { GridRowId, GridSortModel } from '@mui/x-data-grid-pro';
 
 export interface PspListProps<T extends PatientRecord = PatientRecord> {
-  config: PspListConfig<T>;
+  config: PspListConfig;
   params: Record<string, string>;
   onPatientSelect: (patient: T) => void;
   filterPredicates?: Array<FilterPredicate<T>>;
@@ -42,8 +44,8 @@ function PspListRoot<T extends PatientRecord>({
     enabled,
   });
 
-  const { currentSortIndex, setSortIndex, sortRows } = useSort(
-    config.sortOptions as SortOption<PatientRecord>[],
+  const { currentSortIndex, setSortIndex, sortRows } = useSort<PatientRecord>(
+    config.sortOptions,
     config.defaultSortIndex,
   );
 
@@ -62,9 +64,8 @@ function PspListRoot<T extends PatientRecord>({
     return sortRows(filtered);
   }, [rawRows, filterRows, sortRows, sortModel.length]);
 
-  /** Context menu sort: clear header sort so menu comparator applies. */
   const handleSetSortIndex = useCallback(
-    (index: number) => {
+    (index: number | null) => {
       setSortModel([]);
       setSortIndex(index);
     },
@@ -110,9 +111,11 @@ function PspListRoot<T extends PatientRecord>({
   );
 
   return (
-    <PspListProvider value={contextValue}>
-      {children}
-    </PspListProvider>
+    <ThemeProvider theme={pspTheme}>
+      <PspListProvider value={contextValue}>
+        {children}
+      </PspListProvider>
+    </ThemeProvider>
   );
 }
 

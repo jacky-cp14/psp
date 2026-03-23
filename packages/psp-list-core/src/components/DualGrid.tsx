@@ -1,18 +1,21 @@
-import React, { useRef, useCallback, useMemo, startTransition } from "react";
+import React, { useRef, useCallback, startTransition } from "react";
 import { DataGridPro } from "@mui/x-data-grid-pro";
 import type { GridColDef, GridRowParams } from "@mui/x-data-grid-pro";
 import { PanelGroup, Panel, PanelResizeHandle } from "react-resizable-panels";
 import { usePspList } from "../context/PspListContext";
 import { useKeyboardNavigation } from "../hooks/useKeyboardNavigation";
 import type { RowColorScheme } from "../utils/row-styling";
-import { getRowClass, rowColorSx } from "../utils/row-styling";
+import { getRowClass } from "../utils/row-styling";
 
 export interface DualGridProps {
   leftColumns: GridColDef[];
   rightColumns: GridColDef[];
   defaultSplit?: number;
   rowHeight?: number;
-  /** Row color scheme — use resolveColorScheme() to map from psp_* config params */
+  /**
+   * Alternating row colors. Defaults to `'gray'` (PSP-style striping).
+   * Use `resolveColorScheme()` for legacy `psp_*` params, or `'none'` for a flat grid.
+   */
   colorScheme?: RowColorScheme;
   /** Additional custom row class names (composed with library's color classes) */
   getRowClassName?: (params: GridRowParams) => string;
@@ -30,7 +33,7 @@ export function DualGrid({
   rightColumns,
   defaultSplit = 35,
   rowHeight = ROW_HEIGHT,
-  colorScheme,
+  colorScheme = 'gray',
   getRowClassName: customGetRowClassName,
   onRowDoubleClick,
 }: DualGridProps): React.ReactElement {
@@ -84,11 +87,6 @@ export function DualGrid({
     [colorScheme, customGetRowClassName],
   );
 
-  const gridSx = useMemo(
-    () => (colorScheme ? rowColorSx : undefined),
-    [colorScheme],
-  );
-
   const sharedGridProps = {
     rows,
     rowHeight,
@@ -105,7 +103,6 @@ export function DualGrid({
     onRowClick: handleRowClick,
     onRowDoubleClick: handleDoubleClick,
     getRowClassName: composedGetRowClassName,
-    sx: gridSx,
     componentsProps: {
       row: { style: { cursor: "pointer" } },
     },

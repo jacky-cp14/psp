@@ -8,8 +8,8 @@ export interface PspListContextValue {
   rows: PatientRecord[];
   /** Currently selected row ID (null if none) */
   selectedRowId: GridRowId | null;
-  /** Current sort option index (context menu) */
-  currentSortIndex: number;
+  /** Current sort option index (context menu), or null when unsorted */
+  currentSortIndex: number | null;
   /** Column header sort model — when non-empty, grid sorts by this and shows header indicators */
   sortModel: GridSortModel;
   /** Set column header sort model (from header click) */
@@ -28,8 +28,8 @@ export interface PspListContextValue {
   refetch: () => void;
   /** Set selected row (from row click) */
   setSelectedRowId: (id: GridRowId | null) => void;
-  /** Set sort option index (context menu; clears sortModel so menu sort applies) */
-  setSortIndex: (index: number) => void;
+  /** Set sort option index (context menu; clears sortModel so menu sort applies). null = unsorted. */
+  setSortIndex: (index: number | null) => void;
   /** Update filter state */
   setFilterState: (state: FilterState | ((prev: FilterState) => FilterState)) => void;
   /** Toggle language mode */

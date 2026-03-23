@@ -5,7 +5,7 @@
  * the legacy psp_* config parameters can use `resolveColorScheme()` to
  * map them to a scheme value.
  */
-import type { SxProps, Theme } from '@mui/material/styles';
+import { tokens } from '../theme/pspTokens';
 
 /**
  * One prop to rule them all.
@@ -13,14 +13,15 @@ import type { SxProps, Theme } from '@mui/material/styles';
  * - `'yellow'` / `'gray'` / `'blue'` — alternating row colors
  * - `'ward-highlight'` — non-default ward: yellow bg + red text, all rows same
  * - `'ward-highlight-alt'` — same but alternating two highlight shades
- * - `undefined` — no striping (flat)
+ * - `'none'` — no striping (flat)
  */
 export type RowColorScheme =
   | 'yellow'
   | 'gray'
   | 'blue'
   | 'ward-highlight'
-  | 'ward-highlight-alt';
+  | 'ward-highlight-alt'
+  | 'none';
 
 export interface ResolveColorSchemeInput {
   altRowColorOption?: 'Y' | 'G' | 'B' | 'NULL' | string;
@@ -42,7 +43,7 @@ export interface ResolveColorSchemeInput {
  */
 export function resolveColorScheme(
   input: ResolveColorSchemeInput,
-): RowColorScheme | undefined {
+): RowColorScheme {
   if (input.isNonDefaultWard) {
     return input.nonDefaultWardAltColor ? 'ward-highlight-alt' : 'ward-highlight';
   }
@@ -51,7 +52,7 @@ export function resolveColorScheme(
     case 'Y': return 'yellow';
     case 'G': return 'gray';
     case 'B': return 'blue';
-    default: return undefined;
+    default: return 'none';
   }
 }
 
@@ -71,10 +72,10 @@ const CLS = {
 export { CLS as ROW_CLASSES };
 
 const COLORS = {
-  yellow: { even: '#FFF9C4', odd: '#FFFDE7' },
-  gray: { even: '#EEEEEE', odd: '#FAFAFA' },
-  blue: { even: '#E3F2FD', odd: '#EFF7FF' },
-  ndw: { base: '#FFF68F', alt: '#FFFACD' },
+  yellow: tokens.color.row.yellow,
+  gray: tokens.color.row.gray,
+  blue: tokens.color.row.blue,
+  ndw: { base: tokens.color.row.ndw.base, alt: tokens.color.row.ndw.alt },
 } as const;
 
 export { COLORS as ROW_COLORS };
@@ -84,7 +85,7 @@ export function getRowClass(
   index: number,
   scheme: RowColorScheme | undefined,
 ): string {
-  if (!scheme) return '';
+  if (!scheme || scheme === 'none') return '';
 
   const isEven = index % 2 === 0;
   switch (scheme) {
@@ -101,14 +102,3 @@ export function getRowClass(
   }
 }
 
-/** MUI sx styles for all row color classes. Applied internally by DualGrid. */
-export const rowColorSx: SxProps<Theme> = {
-  [`& .${CLS.yellowEven}`]: { backgroundColor: COLORS.yellow.even },
-  [`& .${CLS.yellowOdd}`]: { backgroundColor: COLORS.yellow.odd },
-  [`& .${CLS.grayEven}`]: { backgroundColor: COLORS.gray.even },
-  [`& .${CLS.grayOdd}`]: { backgroundColor: COLORS.gray.odd },
-  [`& .${CLS.blueEven}`]: { backgroundColor: COLORS.blue.even },
-  [`& .${CLS.blueOdd}`]: { backgroundColor: COLORS.blue.odd },
-  [`& .${CLS.ndw}`]: { backgroundColor: COLORS.ndw.base, color: 'red' },
-  [`& .${CLS.ndwAlt}`]: { backgroundColor: COLORS.ndw.alt, color: 'red' },
-};

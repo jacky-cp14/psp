@@ -1,36 +1,46 @@
 import { useState, useCallback, useMemo } from 'react';
 import type { PatientRecord } from '../types/patient-record';
 import type { SortOption } from '../types/list-config';
+import { buildComparator } from '../utils/sort-comparators';
 
 export interface UseSortReturn<T extends PatientRecord> {
-  currentSortIndex: number;
-  setSortIndex: (index: number) => void;
+  /** Current active sort index, or null when unsorted. */
+  currentSortIndex: number | null;
+  /** Set the active sort index. Pass null for no sort. */
+  setSortIndex: (index: number | null) => void;
+  /** Returns a sorted copy of rows (or identity when unsorted). */
   sortRows: (rows: T[]) => T[];
-  sortOptions: SortOption<T>[];
+  sortOptions: SortOption[];
 }
 
 export function useSort<T extends PatientRecord>(
-  options: SortOption<T>[],
-  defaultIndex = 0,
+  options: SortOption[],
+  defaultIndex: number | null = 0,
 ): UseSortReturn<T> {
   const [currentSortIndex, setCurrentSortIndex] = useState(defaultIndex);
 
   const setSortIndex = useCallback(
-    (index: number) => {
-      if (index >= 0 && index < options.length) {
+    (index: number | null) => {
+      if (index === null || (index >= 0 && index < options.length)) {
         setCurrentSortIndex(index);
       }
     },
     [options.length],
   );
 
+  const comparator = useMemo(() => {
+    if (currentSortIndex === null) return null;
+    const option = options[currentSortIndex];
+    if (!option) return null;
+    return buildComparator<T>(option.keys);
+  }, [options, currentSortIndex]);
+
   const sortRows = useCallback(
     (rows: T[]): T[] => {
-      const comparator = options[currentSortIndex]?.comparator;
       if (!comparator) return rows;
       return [...rows].sort(comparator);
     },
-    [options, currentSortIndex],
+    [comparator],
   );
 
   return useMemo(

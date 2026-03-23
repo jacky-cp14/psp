@@ -2,8 +2,8 @@ import React from 'react';
 import type { GridColDef } from '@mui/x-data-grid-pro';
 import { PspList } from '../../src/components/PspList';
 import type { PspListConfig } from '../../src/types/list-config';
+import type { SortOption } from '../../src/utils/sort-comparators';
 import type { NormalPatientRecord } from '../../src/types/patient-record';
-import { normalSortOptions } from '../../src/utils/sort-comparators';
 
 const leftColumns: GridColDef[] = [
   { field: 'wardCode', headerName: 'Ward', width: 65 },
@@ -22,10 +22,59 @@ const rightColumns: GridColDef[] = [
   { field: 'mrn', headerName: 'MRN', width: 92 },
 ];
 
-const config: PspListConfig<NormalPatientRecord> = {
+const sortOptions: SortOption[] = [
+  { label: 'By Admission Date/Time', keys: [
+    { field: 'admissionDtm', direction: 'ASC', type: 'date' },
+    { field: 'wardCode', direction: 'ASC' },
+    { field: 'bedNo', direction: 'ASC' },
+    { field: 'name', direction: 'ASC' },
+  ]},
+  { label: 'By Bed, Name', keys: [
+    { field: 'bedNo', direction: 'ASC' },
+    { field: 'name', direction: 'ASC' },
+  ]},
+  { label: 'By Case No.', keys: [
+    { field: 'caseNo', direction: 'ASC' },
+    { field: 'wardCode', direction: 'ASC' },
+    { field: 'bedNo', direction: 'ASC' },
+    { field: 'name', direction: 'ASC' },
+  ]},
+  { label: 'By HKID', keys: [
+    { field: 'hkid', direction: 'ASC' },
+    { field: 'wardCode', direction: 'ASC' },
+    { field: 'bedNo', direction: 'ASC' },
+    { field: 'name', direction: 'ASC' },
+  ]},
+  { label: 'By Name, Bed', keys: [
+    { field: 'name', direction: 'ASC' },
+    { field: 'wardCode', direction: 'ASC' },
+    { field: 'bedNo', direction: 'ASC' },
+  ]},
+  { label: 'By Source Hospital', keys: [
+    { field: 'sourceCode', direction: 'ASC' },
+    { field: 'wardCode', direction: 'ASC' },
+    { field: 'bedNo', direction: 'ASC' },
+    { field: 'name', direction: 'ASC' },
+  ]},
+  { label: 'By Specialty', keys: [
+    { field: 'specCode', direction: 'ASC' },
+    { field: 'wardCode', direction: 'ASC' },
+    { field: 'bedNo', direction: 'ASC' },
+    { field: 'name', direction: 'ASC' },
+  ]},
+  { label: 'By Source Hospital, Specialty', keys: [
+    { field: 'sourceCode', direction: 'ASC' },
+    { field: 'specCode', direction: 'ASC' },
+    { field: 'wardCode', direction: 'ASC' },
+    { field: 'bedNo', direction: 'ASC' },
+    { field: 'name', direction: 'ASC' },
+  ]},
+];
+
+const config: PspListConfig = {
   servletUrl: 'cpicaseservlet',
   dataRoot: 'cpiPatList',
-  sortOptions: normalSortOptions,
+  sortOptions,
   defaultSortIndex: 1,
 };
 
@@ -40,7 +89,7 @@ export function List0Normal({ params, onPatientSelect }: List0Props): React.Reac
       <PspList.SelectionPanel>
         <span>Normal Patient List</span>
       </PspList.SelectionPanel>
-      <PspList.SortMenu sortLabels={normalSortOptions.map((s) => s.label)}>
+      <PspList.SortMenu sortLabels={sortOptions.map((s) => s.label)}>
         <PspList.DualGrid leftColumns={leftColumns} rightColumns={rightColumns} />
       </PspList.SortMenu>
     </PspList>
