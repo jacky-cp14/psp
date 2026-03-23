@@ -2,7 +2,7 @@ import React, { useState, useRef, startTransition } from 'react';
 import { DataGridPro } from '@mui/x-data-grid-pro';
 import type { GridColDef, GridRowParams } from '@mui/x-data-grid-pro';
 import { PanelGroup, Panel, PanelResizeHandle } from 'react-resizable-panels';
-import { useKeyboardNavigation } from '@psp/core';
+import { useKeyboardNavigation } from '../../packages/psp-list-core/src/hooks/useKeyboardNavigation';
 import type { NormalPatientRecord } from '../types/patient-record';
 import { cpiPatList } from '../dummyData';
 import { List0Normal } from './list0-normal';
