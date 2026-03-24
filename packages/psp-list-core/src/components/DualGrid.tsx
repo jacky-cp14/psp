@@ -58,11 +58,26 @@ export function DualGrid({
     scrollOffset: 57,
   });
 
+  const highlightRowVisually = useCallback(
+    (rowId: string) => {
+      const container = scrollContainerRef.current;
+      if (!container) return;
+      container.querySelectorAll('.MuiDataGrid-row.Mui-selected').forEach((el) => {
+        el.classList.remove('Mui-selected');
+      });
+      container.querySelectorAll(`.MuiDataGrid-row[data-id="${rowId}"]`).forEach((el) => {
+        el.classList.add('Mui-selected');
+      });
+    },
+    [scrollContainerRef],
+  );
+
   const handleRowClick = useCallback(
     (params: GridRowParams) => {
+      highlightRowVisually(String(params.id));
       startTransition(() => setSelectedRowId(params.id));
     },
-    [setSelectedRowId],
+    [setSelectedRowId, highlightRowVisually],
   );
 
   const handleDoubleClick = useCallback(() => {
