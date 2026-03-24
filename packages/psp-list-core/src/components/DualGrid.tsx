@@ -1,4 +1,4 @@
-import React, { useRef, useCallback, startTransition } from "react";
+import React, { useRef, useCallback, useEffect, startTransition } from "react";
 import { DataGridPro } from "@mui/x-data-grid-pro";
 import type { GridColDef, GridRowParams } from "@mui/x-data-grid-pro";
 import { PanelGroup, Panel, PanelResizeHandle } from "react-resizable-panels";
@@ -71,6 +71,18 @@ export function DualGrid({
     },
     [scrollContainerRef],
   );
+
+  useEffect(() => {
+    const container = scrollContainerRef.current;
+    if (!container) return;
+    const onMouseDown = (e: MouseEvent) => {
+      const row = (e.target as HTMLElement).closest('.MuiDataGrid-row');
+      const rowId = row?.getAttribute('data-id');
+      if (rowId) highlightRowVisually(rowId);
+    };
+    container.addEventListener('mousedown', onMouseDown);
+    return () => container.removeEventListener('mousedown', onMouseDown);
+  }, [highlightRowVisually]);
 
   const handleRowClick = useCallback(
     (params: GridRowParams) => {
