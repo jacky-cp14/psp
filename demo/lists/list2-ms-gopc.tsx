@@ -1,17 +1,12 @@
-import React from 'react';
+import React, { useMemo } from 'react';
 import type { GridColDef } from '@mui/x-data-grid-pro';
 import { PspList, SelectionPanel } from '@psp/core';
 import type { SortOption } from '@psp/core';
 import type { GopcPatientRecord } from '../types/patient-record';
 import { useListData } from '../hooks/useListData';
+import { orderLeadSexAgeEnZh, scaleGridColumns, scaleW, useDemoPspLayout } from '../hooks/useDemoPspLayout';
 
-const leftColumns: GridColDef[] = [
-  { field: 'slotDatetime', headerName: 'Slot Date/Time', type: 'dateTime', width: 190 },
-  { field: 'name', headerName: 'English Name', flex: 1, minWidth: 200 },
-  { field: 'chineseName', headerName: 'Chinese Name', width: 160 },
-];
-
-const rightColumns: GridColDef[] = [
+const RIGHT_BASE: GridColDef[] = [
   { field: 'priority', headerName: 'Priority', width: 80 },
   { field: 'assmt', headerName: 'Assmt.', width: 80 },
   { field: 'consult', headerName: 'Consult.', width: 80 },
@@ -21,7 +16,6 @@ const rightColumns: GridColDef[] = [
   { field: 'episode', headerName: 'Episode', width: 152 },
   { field: 'bookDatetime', headerName: 'Book Date/Time', width: 170 },
   { field: 'subSpec', headerName: 'Sub. Spec.', width: 100 },
-  { field: 'sexAge', headerName: 'Sex/Age', width: 82 },
   { field: 'hkid', headerName: 'HKID', width: 124 },
   { field: 'mrn', headerName: 'MRN', width: 170 },
 ];
@@ -58,11 +52,28 @@ interface List2Props {
 }
 
 export function List2MsGopc({ params, onPatientSelect }: List2Props): React.ReactElement {
+  const { langMode, rowHeight, columnScale, defaultSplit } = useDemoPspLayout();
+
   const { rows } = useListData<GopcPatientRecord>({
     servletUrl: 'msgopcservlet',
     dataRoot: 'msGopcPatList',
     params,
   });
+
+  const leftColumns = useMemo(() => {
+    const slot: GridColDef = {
+      field: 'slotDatetime',
+      headerName: 'Slot Date/Time',
+      type: 'dateTime',
+      width: scaleW(190, columnScale),
+    };
+    return orderLeadSexAgeEnZh(langMode, [], columnScale, slot);
+  }, [langMode, columnScale]);
+
+  const rightColumns = useMemo(
+    () => scaleGridColumns(RIGHT_BASE, columnScale),
+    [columnScale],
+  );
 
   return (
     <>
@@ -74,6 +85,8 @@ export function List2MsGopc({ params, onPatientSelect }: List2Props): React.Reac
         sortOptions={sortOptions}
         defaultSortIndex={0}
         onPatientSelect={onPatientSelect}
+        rowHeight={rowHeight}
+        defaultSplit={defaultSplit}
       />
     </>
   );

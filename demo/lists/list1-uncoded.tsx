@@ -1,23 +1,27 @@
-import React from 'react';
+import React, { useMemo } from 'react';
 import type { GridColDef } from '@mui/x-data-grid-pro';
 import { PspList, SelectionPanel } from '@psp/core';
 import type { SortOption } from '@psp/core';
 import type { UncodedPatientRecord } from '../types/patient-record';
 import { useListData } from '../hooks/useListData';
+import { orderLeadSexAgeEnZh, scaleGridColumns, scaleW, useDemoPspLayout } from '../hooks/useDemoPspLayout';
 
-const leftColumns: GridColDef[] = [
-  { field: 'bed', headerName: 'Bed', width: 100 },
-  { field: 'name', headerName: 'English Name', flex: 1, minWidth: 200 },
-  { field: 'chineseName', headerName: 'Chinese Name', width: 160 },
-];
-
-const rightColumns: GridColDef[] = [
+const RIGHT_BASE: GridColDef[] = [
   { field: 'caseNo', headerName: 'Episode', width: 152 },
   { field: 'specCode', headerName: 'Spec.', width: 62 },
-  { field: 'admissionDtm', headerName: 'Admission Date/Time', type: 'dateTime', width: 202 },
-  { field: 'sexAge', headerName: 'Sex/Age', width: 82 },
+  {
+    field: 'admissionDtm',
+    headerName: 'Admission Date/Time',
+    type: 'dateTime',
+    width: 202,
+  },
   { field: 'sourceCode', headerName: 'Source Code', width: 122 },
-  { field: 'dischargeDtm', headerName: 'Discharge Date/Time', type: 'dateTime', width: 202 },
+  {
+    field: 'dischargeDtm',
+    headerName: 'Discharge Date/Time',
+    type: 'dateTime',
+    width: 202,
+  },
   { field: 'hkid', headerName: 'HKID', width: 124 },
 ];
 
@@ -77,11 +81,23 @@ interface List1Props {
 }
 
 export function List1Uncoded({ params, onPatientSelect }: List1Props): React.ReactElement {
+  const { langMode, rowHeight, columnScale, defaultSplit } = useDemoPspLayout();
+
   const { rows } = useListData<UncodedPatientRecord>({
     servletUrl: 'uncodeservlet',
     dataRoot: 'cpiUnCodePatList',
     params,
   });
+
+  const leftColumns = useMemo(() => {
+    const bed: GridColDef = { field: 'bed', headerName: 'Bed', width: scaleW(100, columnScale) };
+    return orderLeadSexAgeEnZh(langMode, [], columnScale, bed);
+  }, [langMode, columnScale]);
+
+  const rightColumns = useMemo(
+    () => scaleGridColumns(RIGHT_BASE, columnScale),
+    [columnScale],
+  );
 
   return (
     <>
@@ -93,6 +109,8 @@ export function List1Uncoded({ params, onPatientSelect }: List1Props): React.Rea
         sortOptions={sortOptions}
         defaultSortIndex={2}
         onPatientSelect={onPatientSelect}
+        rowHeight={rowHeight}
+        defaultSplit={defaultSplit}
       />
     </>
   );

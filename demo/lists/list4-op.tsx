@@ -1,21 +1,15 @@
-import React from 'react';
+import React, { useMemo } from 'react';
 import type { GridColDef } from '@mui/x-data-grid-pro';
 import { PspList, SelectionPanel } from '@psp/core';
 import type { SortOption } from '@psp/core';
 import type { OpPatientRecord } from '../types/patient-record';
 import { useListData } from '../hooks/useListData';
+import { orderLeadSexAgeEnZh, scaleGridColumns, scaleW, useDemoPspLayout } from '../hooks/useDemoPspLayout';
 
-const leftColumns: GridColDef[] = [
-  { field: 'slotDatetime', headerName: 'Slot Date/Time', type: 'dateTime', width: 190 },
-  { field: 'name', headerName: 'English Name', flex: 1, minWidth: 200 },
-  { field: 'chineseName', headerName: 'Chinese Name', width: 160 },
-];
-
-const rightColumns: GridColDef[] = [
+const RIGHT_BASE: GridColDef[] = [
   { field: 'episode', headerName: 'Episode', width: 152 },
   { field: 'priority', headerName: 'Priority', width: 80 },
   { field: 'type', headerName: 'Type', width: 80 },
-  { field: 'sexAge', headerName: 'Sex/Age', width: 82 },
   { field: 'attendTime', headerName: 'Attend Time', width: 120 },
   { field: 'hkid', headerName: 'HKID', width: 124 },
   { field: 'mrn', headerName: 'MRN', width: 150 },
@@ -59,11 +53,28 @@ interface List4Props {
 }
 
 export function List4Op({ params, onPatientSelect }: List4Props): React.ReactElement {
+  const { langMode, rowHeight, columnScale, defaultSplit } = useDemoPspLayout();
+
   const { rows } = useListData<OpPatientRecord>({
     servletUrl: 'opservlet',
     dataRoot: 'opPatList',
     params,
   });
+
+  const leftColumns = useMemo(() => {
+    const slot: GridColDef = {
+      field: 'slotDatetime',
+      headerName: 'Slot Date/Time',
+      type: 'dateTime',
+      width: scaleW(190, columnScale),
+    };
+    return orderLeadSexAgeEnZh(langMode, [], columnScale, slot);
+  }, [langMode, columnScale]);
+
+  const rightColumns = useMemo(
+    () => scaleGridColumns(RIGHT_BASE, columnScale),
+    [columnScale],
+  );
 
   return (
     <>
@@ -75,6 +86,8 @@ export function List4Op({ params, onPatientSelect }: List4Props): React.ReactEle
         sortOptions={sortOptions}
         defaultSortIndex={0}
         onPatientSelect={onPatientSelect}
+        rowHeight={rowHeight}
+        defaultSplit={defaultSplit}
       />
     </>
   );

@@ -1,25 +1,22 @@
-import React from 'react';
+import React, { useMemo } from 'react';
 import type { GridColDef } from '@mui/x-data-grid-pro';
 import { PspList, SelectionPanel } from '@psp/core';
 import type { SortOption } from '@psp/core';
 import type { ActiveTeamPatientRecord } from '../types/patient-record';
 import { useListData } from '../hooks/useListData';
+import { orderLeadSexAgeEnZh, scaleGridColumns, scaleW, useDemoPspLayout } from '../hooks/useDemoPspLayout';
 
-const leftColumns: GridColDef[] = [
-  { field: 'wardCode2Disp', headerName: 'Ward', width: 65 },
-  { field: 'bed', headerName: 'Bed', width: 100 },
-  { field: 'name', headerName: 'English Name', flex: 1, minWidth: 200 },
-  { field: 'chineseName', headerName: 'Chinese Name', width: 160 },
-  { field: 'sexAge', headerName: 'Sex/Age', width: 90 },
-  { field: 'hkid', headerName: 'HKID', width: 140 },
-];
-
-const rightColumns: GridColDef[] = [
+const RIGHT_BASE: GridColDef[] = [
   { field: 'caseNo', headerName: 'Episode', width: 152 },
   { field: 'specCode', headerName: 'Spec.', width: 62 },
   { field: 'teamCode', headerName: 'Team', width: 120 },
   { field: 'specIC', headerName: 'Specialist I/C', width: 200 },
-  { field: 'admissionDtm', headerName: 'Admission Date/Time', type: 'dateTime', width: 202 },
+  {
+    field: 'admissionDtm',
+    headerName: 'Admission Date/Time',
+    type: 'dateTime',
+    width: 202,
+  },
   { field: 'sourceCode', headerName: 'Source Code', width: 122 },
 ];
 
@@ -90,11 +87,26 @@ interface List9Props {
 }
 
 export function List9ActiveTeam({ params, onPatientSelect }: List9Props): React.ReactElement {
+  const { langMode, rowHeight, columnScale, defaultSplit } = useDemoPspLayout();
+
   const { rows } = useListData<ActiveTeamPatientRecord>({
     servletUrl: 'activeteamservlet',
     dataRoot: 'cpiActiveTeamPatList',
     params,
   });
+
+  const leftColumns = useMemo(() => {
+    const f = columnScale;
+    const ward: GridColDef = { field: 'wardCode2Disp', headerName: 'Ward', width: scaleW(65, f) };
+    const bed: GridColDef = { field: 'bed', headerName: 'Bed', width: scaleW(100, f) };
+    const hkid: GridColDef = { field: 'hkid', headerName: 'HKID', width: scaleW(140, f) };
+    return orderLeadSexAgeEnZh(langMode, [ward], columnScale, bed, [hkid]);
+  }, [langMode, columnScale]);
+
+  const rightColumns = useMemo(
+    () => scaleGridColumns(RIGHT_BASE, columnScale),
+    [columnScale],
+  );
 
   return (
     <>
@@ -106,6 +118,8 @@ export function List9ActiveTeam({ params, onPatientSelect }: List9Props): React.
         sortOptions={sortOptions}
         defaultSortIndex={8}
         onPatientSelect={onPatientSelect}
+        rowHeight={rowHeight}
+        defaultSplit={defaultSplit}
       />
     </>
   );

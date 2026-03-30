@@ -1,4 +1,4 @@
-import React, { useState, useRef, startTransition } from 'react';
+import React, { useState, useRef, useMemo, startTransition } from 'react';
 import { DataGridPro } from '@mui/x-data-grid-pro';
 import type { GridColDef, GridRowParams } from '@mui/x-data-grid-pro';
 import { PanelGroup, Panel, PanelResizeHandle } from 'react-resizable-panels';
@@ -6,40 +6,51 @@ import { useKeyboardNavigation } from '../../packages/psp-list-core/src/hooks/us
 import type { NormalPatientRecord } from '../types/patient-record';
 import { cpiPatList } from '../dummyData';
 import { List0Normal } from './list0-normal';
+import {
+  orderLeadSexAgeEnZh,
+  scaleGridColumns,
+  scaleW,
+  useDemoPspLayout,
+} from '../hooks/useDemoPspLayout';
+import type { LangMode } from '@psp/core';
 
-const ROW_HEIGHT = 28;
 const ROWS = cpiPatList;
 
-const allCols: GridColDef[] = [
-  { field: 'wardCode', headerName: 'Ward', width: 65 },
-  { field: 'bed', headerName: 'Bed', width: 100 },
-  { field: 'name', headerName: 'Name', flex: 1, minWidth: 200 },
+/** Single-grid layers: ward + bed → Sex/Age + names (per lang) + episode/spec. */
+function buildPerfLabAllColumns(langMode: LangMode, factor: number): GridColDef[] {
+  const ward: GridColDef = { field: 'wardCode', headerName: 'Ward', width: scaleW(65, factor) };
+  const bed: GridColDef = { field: 'bed', headerName: 'Bed', width: scaleW(100, factor) };
+  const left = orderLeadSexAgeEnZh(langMode, [ward], factor, bed);
+  const tail = scaleGridColumns(
+    [
+      { field: 'caseNo', headerName: 'Episode', width: 152 },
+      { field: 'specCode', headerName: 'Spec', width: 62 },
+    ],
+    factor,
+  );
+  return [...left, ...tail];
+}
+
+const RIGHT_COLS_BASE: GridColDef[] = [
   { field: 'caseNo', headerName: 'Episode', width: 152 },
   { field: 'specCode', headerName: 'Spec', width: 62 },
-  { field: 'sexAge', headerName: 'Sex/Age', width: 82 },
-];
-
-const leftCols: GridColDef[] = [
-  { field: 'wardCode', headerName: 'Ward', width: 65 },
-  { field: 'bed', headerName: 'Bed', width: 100 },
-  { field: 'name', headerName: 'Name', flex: 1, minWidth: 200 },
-];
-
-const rightCols: GridColDef[] = [
-  { field: 'caseNo', headerName: 'Episode', width: 152 },
-  { field: 'specCode', headerName: 'Spec', width: 62 },
-  { field: 'sexAge', headerName: 'Sex/Age', width: 82 },
   { field: 'sourceCode', headerName: 'Source', width: 80 },
 ];
 
 /* ─── Layer 0: Vanilla DataGridPro (built-in keyboard, virtualization ON) ─── */
 function Layer0(): React.ReactElement {
+  const { langMode, rowHeight, columnScale } = useDemoPspLayout();
+  const columns = useMemo(
+    () => buildPerfLabAllColumns(langMode, columnScale),
+    [langMode, columnScale],
+  );
+
   return (
     <div style={{ flex: 1, minHeight: 0 }}>
       <DataGridPro
         rows={ROWS}
-        columns={allCols}
-        rowHeight={ROW_HEIGHT}
+        columns={columns}
+        rowHeight={rowHeight}
         hideFooter
         disableColumnMenu
       />
@@ -50,13 +61,18 @@ function Layer0(): React.ReactElement {
 /* ─── Layer 1: autoHeight (virtualization OFF, DataGrid internal keyboard) ─── */
 function Layer1(): React.ReactElement {
   const scrollRef = useRef<HTMLDivElement>(null);
+  const { langMode, rowHeight, columnScale } = useDemoPspLayout();
+  const columns = useMemo(
+    () => buildPerfLabAllColumns(langMode, columnScale),
+    [langMode, columnScale],
+  );
 
   return (
     <div ref={scrollRef} style={{ flex: 1, minHeight: 0, overflowY: 'auto' }}>
       <DataGridPro
         rows={ROWS}
-        columns={allCols}
-        rowHeight={ROW_HEIGHT}
+        columns={columns}
+        rowHeight={rowHeight}
         hideFooter
         autoHeight
         disableColumnMenu
@@ -69,6 +85,11 @@ function Layer1(): React.ReactElement {
 function Layer2(): React.ReactElement {
   const [selectedId, setSelectedId] = useState<string | null>(null);
   const scrollRef = useRef<HTMLDivElement>(null);
+  const { langMode, rowHeight, columnScale } = useDemoPspLayout();
+  const columns = useMemo(
+    () => buildPerfLabAllColumns(langMode, columnScale),
+    [langMode, columnScale],
+  );
 
   const selectedIndex = selectedId
     ? ROWS.findIndex((r) => r.id === selectedId)
@@ -83,7 +104,7 @@ function Layer2(): React.ReactElement {
     },
     onSubmit: () => {},
     scrollContainerRef: scrollRef as React.RefObject<HTMLDivElement>,
-    rowHeight: ROW_HEIGHT,
+    rowHeight,
     scrollOffset: 57,
   });
 
@@ -96,8 +117,8 @@ function Layer2(): React.ReactElement {
     >
       <DataGridPro
         rows={ROWS}
-        columns={allCols}
-        rowHeight={ROW_HEIGHT}
+        columns={columns}
+        rowHeight={rowHeight}
         hideFooter
         autoHeight
         disableColumnMenu
@@ -115,6 +136,14 @@ function Layer2(): React.ReactElement {
 function Layer3(): React.ReactElement {
   const [selectedId, setSelectedId] = useState<string | null>(null);
   const scrollRef = useRef<HTMLDivElement>(null);
+  const { langMode, rowHeight, columnScale, defaultSplit } = useDemoPspLayout();
+  const leftCols = useMemo(() => {
+    const f = columnScale;
+    const ward: GridColDef = { field: 'wardCode', headerName: 'Ward', width: scaleW(65, f) };
+    const bed: GridColDef = { field: 'bed', headerName: 'Bed', width: scaleW(100, f) };
+    return orderLeadSexAgeEnZh(langMode, [ward], f, bed);
+  }, [langMode, columnScale]);
+  const rightCols = useMemo(() => scaleGridColumns(RIGHT_COLS_BASE, columnScale), [columnScale]);
 
   const selectedIndex = selectedId
     ? ROWS.findIndex((r) => r.id === selectedId)
@@ -129,14 +158,14 @@ function Layer3(): React.ReactElement {
     },
     onSubmit: () => {},
     scrollContainerRef: scrollRef as React.RefObject<HTMLDivElement>,
-    rowHeight: ROW_HEIGHT,
+    rowHeight,
     scrollOffset: 57,
   });
 
   const selectionModel = selectedId ? [selectedId] : [];
   const sharedProps = {
     rows: ROWS,
-    rowHeight: ROW_HEIGHT,
+    rowHeight,
     hideFooter: true,
     autoHeight: true,
     disableColumnMenu: true,
@@ -147,7 +176,7 @@ function Layer3(): React.ReactElement {
     onRowClick: (params: GridRowParams) => startTransition(() => setSelectedId(String(params.id))),
   };
 
-  const contentHeight = ROWS.length * ROW_HEIGHT;
+  const contentHeight = ROWS.length * rowHeight;
 
   return (
     <div
@@ -158,7 +187,7 @@ function Layer3(): React.ReactElement {
     >
       <div style={{ minHeight: contentHeight }}>
         <PanelGroup direction="horizontal">
-          <Panel defaultSize={35} style={{ minWidth: 0 }}>
+          <Panel defaultSize={defaultSplit} style={{ minWidth: 0 }}>
             <div style={{ minWidth: 0, overflowX: 'auto', width: '100%', height: '100%' }}>
               <DataGridPro {...sharedProps} columns={leftCols} />
             </div>

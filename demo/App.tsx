@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
+import { usePspGlobal } from '@psp/core';
 import type { BasePatientRecord } from './types/patient-record';
 import { List0Normal } from './lists/list0-normal';
 import { List1Uncoded } from './lists/list1-uncoded';
@@ -33,6 +34,10 @@ const LISTS = [
 
 export function App(): React.ReactElement {
   const [activeList, setActiveList] = useState(0);
+  const langMode = usePspGlobal((s) => s.langMode);
+  const frameMode = usePspGlobal((s) => s.frameMode);
+  const toggleLang = usePspGlobal((s) => s.toggleLang);
+  const toggleFrame = usePspGlobal((s) => s.toggleFrame);
 
   const handlePatientSelect = (patient: BasePatientRecord) => {
     console.log('Selected patient:', patient);
@@ -62,16 +67,57 @@ export function App(): React.ReactElement {
             </button>
           ))}
         </nav>
-        <main style={{ flex: 1, overflow: 'hidden', display: 'flex', flexDirection: 'column' }}>
+        <main style={{ flex: 1, overflow: 'hidden', display: 'flex', flexDirection: 'column', minHeight: 0 }}>
           <div
             style={{
-              height: '80%',
-              minHeight: 0,
-              overflow: 'hidden',
+              flexShrink: 0,
               display: 'flex',
-              flexDirection: 'column',
+              flexWrap: 'wrap',
+              alignItems: 'center',
+              gap: 8,
+              padding: '6px 10px',
+              backgroundColor: '#f5f5f5',
+              borderBottom: '1px solid #e0e0e0',
             }}
           >
+            <span style={{ color: '#616161', fontSize: 11 }}>Demo layout</span>
+            <button
+              type="button"
+              onClick={() => toggleLang()}
+              title="Toggle list language (column order on Normal list)"
+              style={{
+                padding: '4px 10px',
+                backgroundColor: '#fff',
+                color: '#1976d2',
+                border: '1px solid #90caf9',
+                borderRadius: 4,
+                cursor: 'pointer',
+                fontSize: 12,
+              }}
+            >
+              {langMode === 'en' ? '中文' : 'ENG'}
+            </button>
+            <button
+              type="button"
+              onClick={() => toggleFrame()}
+              title="Toggle expand vs compact row height and column widths"
+              style={{
+                padding: '4px 10px',
+                backgroundColor: '#fff',
+                color: '#1976d2',
+                border: '1px solid #90caf9',
+                borderRadius: 4,
+                cursor: 'pointer',
+                fontSize: 12,
+              }}
+            >
+              {frameMode === 'expand' ? 'Compact' : 'Expand'}
+            </button>
+            <span style={{ color: '#757575', fontSize: 11 }}>
+              {langMode === 'en' ? 'EN' : 'ZH'} · {frameMode}
+            </span>
+          </div>
+          <div style={{ flex: 1, minHeight: 0, overflow: 'hidden', display: 'flex', flexDirection: 'column' }}>
             <ActiveList
               params={{ hospCode: 'QMH', wardCode: 'WARD_A' }}
               onPatientSelect={handlePatientSelect}

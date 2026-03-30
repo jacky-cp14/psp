@@ -1,22 +1,20 @@
-import React from 'react';
+import React, { useMemo } from 'react';
 import type { GridColDef } from '@mui/x-data-grid-pro';
 import { PspList, SelectionPanel } from '@psp/core';
 import type { SortOption } from '@psp/core';
 import type { NormalPatientRecord } from '../types/patient-record';
 import { useListData } from '../hooks/useListData';
+import { orderLeadSexAgeEnZh, scaleGridColumns, scaleW, useDemoPspLayout } from '../hooks/useDemoPspLayout';
 
-const leftColumns: GridColDef[] = [
-  { field: 'wardCode', headerName: 'Ward', width: 65 },
-  { field: 'bed', headerName: 'Bed', width: 100 },
-  { field: 'name', headerName: 'English Name', flex: 1, minWidth: 200 },
-  { field: 'chineseName', headerName: 'Chinese Name', width: 160 },
-];
-
-const rightColumns: GridColDef[] = [
+const RIGHT_BASE: GridColDef[] = [
   { field: 'caseNo', headerName: 'Episode', width: 152 },
   { field: 'specCode', headerName: 'Spec.', width: 62 },
-  { field: 'admissionDtm', headerName: 'Admission Date/Time', type: 'dateTime', width: 202 },
-  { field: 'sexAge', headerName: 'Sex/Age', width: 82 },
+  {
+    field: 'admissionDtm',
+    headerName: 'Admission Date/Time',
+    type: 'dateTime',
+    width: 202,
+  },
   { field: 'sourceCode', headerName: 'Source Code', width: 122 },
   { field: 'hkid', headerName: 'HKID', width: 124 },
 ];
@@ -82,11 +80,25 @@ interface List8Props {
 }
 
 export function List8ActiveMo({ params, onPatientSelect }: List8Props): React.ReactElement {
+  const { langMode, rowHeight, columnScale, defaultSplit } = useDemoPspLayout();
+
   const { rows } = useListData<NormalPatientRecord>({
     servletUrl: 'activemoservlet',
     dataRoot: 'cpiActiveMoPatList',
     params,
   });
+
+  const leftColumns = useMemo(() => {
+    const f = columnScale;
+    const ward: GridColDef = { field: 'wardCode', headerName: 'Ward', width: scaleW(65, f) };
+    const bed: GridColDef = { field: 'bed', headerName: 'Bed', width: scaleW(100, f) };
+    return orderLeadSexAgeEnZh(langMode, [ward], columnScale, bed);
+  }, [langMode, columnScale]);
+
+  const rightColumns = useMemo(
+    () => scaleGridColumns(RIGHT_BASE, columnScale),
+    [columnScale],
+  );
 
   return (
     <>
@@ -98,6 +110,8 @@ export function List8ActiveMo({ params, onPatientSelect }: List8Props): React.Re
         sortOptions={sortOptions}
         defaultSortIndex={8}
         onPatientSelect={onPatientSelect}
+        rowHeight={rowHeight}
+        defaultSplit={defaultSplit}
       />
     </>
   );
