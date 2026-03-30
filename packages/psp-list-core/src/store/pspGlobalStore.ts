@@ -7,17 +7,32 @@
  * exactly once — every plugin shares the same store instance.
  */
 
-import { create } from 'zustand';
+import { create } from "zustand";
 
 /** Display language — `'en'` (English) | `'zh'` (Chinese) */
-export type LangMode = 'en' | 'zh';
+export type LangMode = "en" | "zh";
 
 /** Layout width — `'expand'` (full-width) | `'compact'` (narrow) */
-export type FrameMode = 'expand' | 'compact';
+export type FrameMode = "expand" | "compact";
 
 export interface PspGlobalState {
   langMode: LangMode;
   frameMode: FrameMode;
+
+  /**
+   * User's login ward, fetched once at PSP init.
+   * Replaces ExtJS `top.parent.pspCurrentWard` (the initial read)
+   * and the per-list `defaultWard` prototype property.
+   */
+  defaultWard: string;
+
+  /**
+   * Active ward selection, shared across all lists.
+   * Replaces ExtJS `currentWardInfo.ward`, `top.parent.pspCurrentWard`
+   * (write-back), and per-list `this.currentWard`.
+   * Updated when user picks a ward in the combo on any list.
+   */
+  currentWard: string;
 }
 
 export interface PspGlobalActions {
@@ -25,15 +40,27 @@ export interface PspGlobalActions {
   setPspState: (patch: Partial<PspGlobalState>) => void;
   toggleLang: () => void;
   toggleFrame: () => void;
+  /** Set defaultWard and reset currentWard to match. Called once by the consuming app at PSP init. */
+  setDefaultWard: (ward: string) => void;
+  /** Update the active ward (ward combo select). */
+  setCurrentWard: (ward: string) => void;
 }
 
 export type PspGlobalStore = PspGlobalState & PspGlobalActions;
 
 export const usePspGlobal = create<PspGlobalStore>()((set) => ({
-  langMode: 'en',
-  frameMode: 'expand',
+  langMode: "en",
+  frameMode: "expand",
+  defaultWard: "",
+  currentWard: "",
 
   setPspState: (patch) => set(patch),
-  toggleLang: () => set((s) => ({ langMode: s.langMode === 'en' ? 'zh' : 'en' })),
-  toggleFrame: () => set((s) => ({ frameMode: s.frameMode === 'expand' ? 'compact' : 'expand' })),
+  toggleLang: () =>
+    set((s) => ({ langMode: s.langMode === "en" ? "zh" : "en" })),
+  toggleFrame: () =>
+    set((s) => ({
+      frameMode: s.frameMode === "expand" ? "compact" : "expand",
+    })),
+  setDefaultWard: (ward) => set({ defaultWard: ward, currentWard: ward }),
+  setCurrentWard: (ward) => set({ currentWard: ward }),
 }));

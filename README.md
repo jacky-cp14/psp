@@ -276,16 +276,22 @@ Calling without a selector re-renders on every store change:
 const store = usePspGlobal();
 ```
 
-| State | Type | Default |
-|-------|------|---------|
-| `langMode` | `'en' \| 'zh'` | `'en'` |
-| `frameMode` | `'expand' \| 'compact'` | `'expand'` |
+| State | Type | Default | Description |
+|-------|------|---------|-------------|
+| `langMode` | `'en' \| 'zh'` | `'en'` | Display language. |
+| `frameMode` | `'expand' \| 'compact'` | `'expand'` | Layout width. |
+| `defaultWard` | `string` | `''` | User's login ward, set once at init. |
+| `currentWard` | `string` | `''` | Active ward selection, shared across all lists. |
 
 | Action | Description |
 |--------|-------------|
 | `setPspState(patch)` | Merge partial state. |
 | `toggleLang()` | Toggle `langMode` between `'en'` and `'zh'`. |
 | `toggleFrame()` | Toggle `frameMode` between `'expand'` and `'compact'`. |
+| `setDefaultWard(ward)` | Set `defaultWard` and reset `currentWard` to match. Called once by the consuming app at init. |
+| `setCurrentWard(ward)` | Update `currentWard`. Called by list ward combo on select. |
+
+The library does not fetch ward data. The consuming app must obtain the user's default ward (from a backend API or CMS session) and call `setDefaultWard(ward)` at plugin activation.
 
 ---
 
@@ -391,4 +397,104 @@ Bundled dependencies (not required to install separately):
 pnpm dev    # run demo app
 pnpm test   # run all tests
 pnpm build  # build @psp/core
+```
+
+---
+
+## Session data: ExtJS → React mapping
+
+The original ExtJS PSP ran inside a JSP-rendered iframe. Session data came from two sources: **server-injected `<script>` globals** (set by `cmsPSP.jsp` from Java session/DB) and **parent frame JS variables** (set by the CMS host window). Every list file read these bare globals directly.
+
+In the React architecture, the CMS Hub provides session data through `@cmschassis/cms-js`. The PSP plugin reads it via `cms.api.session.get()`.
+
+### Session constants (set once, read everywhere)
+
+| Original ExtJS global | Source | React equivalent |
+|---|---|---|
+| `localHospCode` | JSP: `var localHospCode = "<%=hospCode%>"` | `cms.api.session.get().environment.hospitalCode` |
+| `loginUser` | JSP: `var loginUser = "<%=loginId%>"` | `cms.api.session.get().user.cmsUserId` |
+| `loginUser` (CORP ID) | JSP | `cms.api.session.get().user.corpId` |
+| `pcEnv` | JSP: `var pcEnv = "PC"` | `cms.api.session.get().environment.os` + `.browser` |
+| `loginUserSpecDesc` | JSP | `cms.api.session.get().user.specialtyCode` |
+
+### Ward state (shared across lists 0, 1, 3, 6, 9)
+
+| Original | Source | React equivalent |
+|---|---|---|
+| `top.parent.pspCurrentWard` | CMS parent frame `window` property, set from user login ward | No CMS API equivalent — PSP must fetch the user's default ward from a PSP config/user-profile API |
+| `defaultWard` | Prototype property: `defaultWard: top.parent.pspCurrentWard` — captured once at JS parse time, never changes | Fetched once at PSP init, stored in Zustand global store as `defaultWard` |
+| `currentWard` | Runtime: set by ward combo `select` handler per list | Zustand global store `currentWard` — survives list unmount/remount |
+| `currentWardInfo.ward` | JSP-rendered shared JS object — bridge between PSP and parent frame | Replaced by the store; no cross-frame bridge needed |
+| `top.parent.pspCurrentWard` (write-back) | Lists 0,1,3,9 write to parent frame on ward select | Not needed — ward state lives in the store, not the parent frame |
+
+Ward state persistence across list switches: in ExtJS, `currentWardInfo.ward` and `top.parent.pspCurrentWard` acted as shared mutable state that all lists read on activate. In React, the Zustand store (`currentWard`) serves the same purpose — when a user selects a ward on list 0 then switches to list 1, list 1 reads `currentWard` from the store.
+
+**The consuming app (parent) is responsible for wiring the default ward.** The library does not fetch ward data itself — it only stores and shares the value. At PSP plugin activation, the consuming app must obtain the user's default ward (from a PSP backend API, CMS session, or other source) and call `setDefaultWard(ward)` on the global store. This sets both `defaultWard` and `currentWard` to the same initial value. After that, individual lists call `setCurrentWard(ward)` when the user picks a different ward from the combo.
+
+```typescript
+// Consuming app — plugin activation
+const ward = await fetchUserDefaultWard(userId, hospCode);
+usePspGlobal.getState().setDefaultWard(ward);
+
+// Inside a list component — ward combo select
+const setCurrentWard = usePspGlobal((s) => s.setCurrentWard);
+const handleWardChange = (ward: string) => setCurrentWard(ward);
+
+// Any list reads the shared ward
+const currentWard = usePspGlobal((s) => s.currentWard);
+const defaultWard = usePspGlobal((s) => s.defaultWard);
+const isNonDefaultWard = currentWard !== defaultWard;
+```
+
+### Configuration parameters (60+ `psp_*` globals)
+
+In ExtJS, the JSP queried the `static_parameter` database table and rendered each value as an inline `<script>` variable (`var psp_show_mrn = "Y"`). All lists read these globals directly.
+
+In React, PSP needs a **config API endpoint** that returns these as JSON:
+
+```
+GET /api/v1/psp/config?hospCode=QMH
+→ { psp_normal_pat_list: "english", psp_show_mrn: "Y", psp_day_discharged_from_source: 7, ... }
+```
+
+Key config parameters used across multiple lists:
+
+| Parameter | Lists | What it controls |
+|---|---|---|
+| `psp_alt_rowcolor_option` | ALL | Row color scheme (Y/G/B) |
+| `psp_day_discharged_from_source` | 0,1,3,5,6,8,9 | Source code red-coloring threshold |
+| `psp_show_mrn` | 0,2,3,4,6,7 | MRN column visibility |
+| `psp_non_default_ward_color` | 0, 9 | Non-default ward row highlighting |
+| `psp_non_default_ward_alt_color` | 0, 9 | Alternating rows in non-default highlight |
+| `psp_team_non_default_ward_color` | 9 | Team list non-default ward color gate |
+| `psp_choice_patient_list` | ALL | List availability/default bitmap |
+| `psp_day_discharged_from_source` | 0,1,3,5,6,8,9 | Discharge day threshold |
+| `pspEnableSearch` | ALL | Search field visibility |
+
+### CMS session API reference (`@cmschassis/cms-js`)
+
+```typescript
+import cms from "./cms-plugin/cms-api-provider";
+
+const session = cms.api.session.get();
+
+session.environment.hospitalCode  // "QMH" — replaces localHospCode
+session.environment.clinicCode    // "NTK" or undefined
+session.environment.mode          // "clinic" | "ward" (CMS4X/4XE only)
+session.environment.shell         // "4X" | "4XE" | "MX"
+session.environment.os            // "ios" | "windows" | "android" | "macos"
+session.user.cmsUserId            // "@CMSIT" — replaces loginUser
+session.user.corpId               // "ABC123"
+session.user.specialtyCode        // "MED"
+session.user.departmentCode       // "MED"
+session.patient?.patientKey       // selected patient (if any)
+session.patient?.hkid
+session.episode?.caseNo           // selected episode (if any)
+session.episode?.wardCode         // patient's ward, NOT user's default ward
+
+// Subscribe to changes (CMS MX only)
+cms.api.session.subscribe(
+  ({ episode }) => episode,
+  (episode) => { /* handle episode change */ }
+);
 ```
