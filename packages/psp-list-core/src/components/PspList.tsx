@@ -3,7 +3,7 @@ import { ThemeProvider } from '@mui/material/styles';
 import type { GridColDef, GridRowId, GridRowParams, GridSortModel } from '@mui/x-data-grid-pro';
 import { pspTheme } from '../theme/pspTheme';
 import type { SortOption } from '../utils/sort-comparators';
-import { buildFieldTypeMap } from '../utils/sort-comparators';
+import { buildFieldCompareMap } from '../utils/sort-comparators';
 import type { RowColorScheme } from '../utils/row-styling';
 import type { PspListContextValue } from '../context/PspListContext';
 import { PspListProvider } from '../context/PspListContext';
@@ -60,15 +60,15 @@ export function PspList<T extends { id: string }>({
   getRowClassName,
   pageSize: _pageSize,
 }: PspListProps<T>): React.ReactElement {
-  const fieldTypes = useMemo(
-    () => buildFieldTypeMap([...leftColumns, ...rightColumns]),
+  const fieldCompares = useMemo(
+    () => buildFieldCompareMap([...leftColumns, ...rightColumns]),
     [leftColumns, rightColumns],
   );
 
   const { currentSortIndex, setSortIndex, sortRows } = useSort<T>(
     sortOptions,
     defaultSortIndex,
-    fieldTypes,
+    fieldCompares,
   );
 
   const [sortModel, setSortModel] = useState<GridSortModel>([]);

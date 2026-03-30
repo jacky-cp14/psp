@@ -1,5 +1,5 @@
 import { useState, useCallback, useMemo } from 'react';
-import type { SortOption, FieldTypeMap } from '../utils/sort-comparators';
+import type { SortOption, FieldCompareMap } from '../utils/sort-comparators';
 import { buildComparator } from '../utils/sort-comparators';
 
 export interface UseSortReturn<T extends { id: string }> {
@@ -15,7 +15,7 @@ export interface UseSortReturn<T extends { id: string }> {
 export function useSort<T extends { id: string }>(
   options: SortOption[],
   defaultIndex: number | null = 0,
-  fieldTypes?: FieldTypeMap,
+  fieldCompares?: FieldCompareMap,
 ): UseSortReturn<T> {
   const [currentSortIndex, setCurrentSortIndex] = useState(defaultIndex);
 
@@ -32,8 +32,8 @@ export function useSort<T extends { id: string }>(
     if (currentSortIndex === null) return null;
     const option = options[currentSortIndex];
     if (!option) return null;
-    return buildComparator<T>(option.keys, fieldTypes);
-  }, [options, currentSortIndex, fieldTypes]);
+    return buildComparator<T>(option.keys, fieldCompares);
+  }, [options, currentSortIndex, fieldCompares]);
 
   const sortRows = useCallback(
     (rows: T[]): T[] => {

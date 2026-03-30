@@ -25,30 +25,30 @@ const rightColumns: GridColDef[] = [
 const sortOptions: SortOption[] = [
   { label: 'By Slot Date/Time, Priority', keys: [
     { field: 'slotDatetime', direction: 'ASC' },
-    { field: 'priorityValue', direction: 'ASC', type: 'numeric' },
+    { field: 'priorityValue', direction: 'ASC', compare: 'numeric' },
     { field: 'type', direction: 'ASC' },
   ]},
   { label: 'By Name, Slot Date/Time', keys: [
     { field: 'name', direction: 'ASC' },
     { field: 'slotDatetime', direction: 'ASC' },
-    { field: 'priorityValue', direction: 'ASC', type: 'numeric' },
+    { field: 'priorityValue', direction: 'ASC', compare: 'numeric' },
     { field: 'type', direction: 'ASC' },
   ]},
   { label: 'By Appt Case Type', keys: [
     { field: 'type', direction: 'ASC' },
     { field: 'slotDatetime', direction: 'ASC' },
-    { field: 'priorityValue', direction: 'ASC', type: 'numeric' },
+    { field: 'priorityValue', direction: 'ASC', compare: 'numeric' },
   ]},
   { label: 'By Case No, Slot Date/Time', keys: [
     { field: 'episode', direction: 'ASC' },
     { field: 'slotDatetime', direction: 'ASC' },
-    { field: 'priorityValue', direction: 'ASC', type: 'numeric' },
+    { field: 'priorityValue', direction: 'ASC', compare: 'numeric' },
     { field: 'type', direction: 'ASC' },
   ]},
   { label: 'By HKID, Slot Date/Time', keys: [
     { field: 'hkid', direction: 'ASC' },
     { field: 'slotDatetime', direction: 'ASC' },
-    { field: 'priorityValue', direction: 'ASC', type: 'numeric' },
+    { field: 'priorityValue', direction: 'ASC', compare: 'numeric' },
     { field: 'type', direction: 'ASC' },
   ]},
 ];

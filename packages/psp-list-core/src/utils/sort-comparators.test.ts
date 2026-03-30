@@ -1,11 +1,11 @@
-import { buildComparator, buildFieldTypeMap } from './sort-comparators';
-import type { SortKey, FieldTypeMap } from './sort-comparators';
+import { buildComparator, buildFieldCompareMap } from './sort-comparators';
+import type { SortKey, FieldCompareMap } from './sort-comparators';
 import type { GridColDef } from '@mui/x-data-grid-pro';
 
 type Row = Record<string, unknown>;
 
-function sort(rows: Row[], keys: SortKey[], fieldTypes?: FieldTypeMap): Row[] {
-  return [...rows].sort(buildComparator(keys, fieldTypes));
+function sort(rows: Row[], keys: SortKey[], fieldCompares?: FieldCompareMap): Row[] {
+  return [...rows].sort(buildComparator(keys, fieldCompares));
 }
 
 describe('buildComparator', () => {
@@ -17,9 +17,9 @@ describe('buildComparator', () => {
   });
 
   // -----------------------------------------------------------------------
-  // String sorting (default type)
+  // String sorting (default)
   // -----------------------------------------------------------------------
-  describe('string sorting (default type)', () => {
+  describe('string sorting (default)', () => {
     const ascByName: SortKey[] = [{ field: 'name', direction: 'ASC' }];
     const descByName: SortKey[] = [{ field: 'name', direction: 'DESC' }];
 
@@ -62,7 +62,7 @@ describe('buildComparator', () => {
   // -----------------------------------------------------------------------
   describe('numeric sorting', () => {
     const ascByAge: SortKey[] = [
-      { field: 'age', direction: 'ASC', type: 'numeric' },
+      { field: 'age', direction: 'ASC', compare: 'numeric' },
     ];
 
     it('should compare numbers correctly ASC', () => {
@@ -72,7 +72,7 @@ describe('buildComparator', () => {
 
     it('should compare numbers correctly DESC', () => {
       const keys: SortKey[] = [
-        { field: 'age', direction: 'DESC', type: 'numeric' },
+        { field: 'age', direction: 'DESC', compare: 'numeric' },
       ];
       const rows = [{ age: 10 }, { age: 30 }, { age: 20 }];
       expect(sort(rows, keys).map((r) => r.age)).toEqual([30, 20, 10]);
@@ -111,7 +111,7 @@ describe('buildComparator', () => {
   // -----------------------------------------------------------------------
   describe('dateTime sorting', () => {
     const ascByDate: SortKey[] = [
-      { field: 'dt', direction: 'ASC', type: 'dateTime' },
+      { field: 'dt', direction: 'ASC', compare: 'dateTime' },
     ];
 
     it('should sort ISO date strings ASC', () => {
@@ -129,7 +129,7 @@ describe('buildComparator', () => {
 
     it('should sort ISO date strings DESC', () => {
       const keys: SortKey[] = [
-        { field: 'dt', direction: 'DESC', type: 'dateTime' },
+        { field: 'dt', direction: 'DESC', compare: 'dateTime' },
       ];
       const rows = [{ dt: '2024-01-01' }, { dt: '2024-12-31' }];
       expect(sort(rows, keys).map((r) => r.dt)).toEqual([
@@ -191,10 +191,10 @@ describe('buildComparator', () => {
       ]);
     });
 
-    it('should support mixed types across keys', () => {
+    it('should support mixed compares across keys', () => {
       const keys: SortKey[] = [
         { field: 'status', direction: 'ASC' },
-        { field: 'priority', direction: 'DESC', type: 'numeric' },
+        { field: 'priority', direction: 'DESC', compare: 'numeric' },
       ];
       const rows = [
         { status: 'open', priority: 1 },
@@ -212,7 +212,7 @@ describe('buildComparator', () => {
     it('should support mixed directions across keys', () => {
       const keys: SortKey[] = [
         { field: 'group', direction: 'ASC' },
-        { field: 'score', direction: 'DESC', type: 'numeric' },
+        { field: 'score', direction: 'DESC', compare: 'numeric' },
       ];
       const rows = [
         { group: 'B', score: 50 },
@@ -230,7 +230,7 @@ describe('buildComparator', () => {
     it('should return 0 when all keys match', () => {
       const keys: SortKey[] = [
         { field: 'x', direction: 'ASC' },
-        { field: 'y', direction: 'ASC', type: 'numeric' },
+        { field: 'y', direction: 'ASC', compare: 'numeric' },
       ];
       const cmp = buildComparator(keys);
       expect(cmp({ x: 'a', y: 1 }, { x: 'a', y: 1 })).toBe(0);
@@ -240,7 +240,7 @@ describe('buildComparator', () => {
       const keys: SortKey[] = [
         { field: 'a', direction: 'ASC' },
         { field: 'b', direction: 'ASC' },
-        { field: 'c', direction: 'DESC', type: 'numeric' },
+        { field: 'c', direction: 'DESC', compare: 'numeric' },
       ];
       const rows = [
         { a: 'X', b: 'Y', c: 1 },
@@ -263,7 +263,7 @@ describe('buildComparator', () => {
 
     it('should treat null as 0 for numeric sort', () => {
       const cmp = buildComparator([
-        { field: 'x', direction: 'ASC', type: 'numeric' },
+        { field: 'x', direction: 'ASC', compare: 'numeric' },
       ]);
       expect(cmp({ x: null }, { x: 5 })).toBeLessThan(0);
       expect(cmp({ x: null }, { x: 0 })).toBe(0);
@@ -271,14 +271,14 @@ describe('buildComparator', () => {
 
     it('should treat null as timestamp 0 for dateTime sort', () => {
       const cmp = buildComparator([
-        { field: 'x', direction: 'ASC', type: 'dateTime' },
+        { field: 'x', direction: 'ASC', compare: 'dateTime' },
       ]);
       expect(cmp({ x: null }, { x: '2024-01-01' })).toBeLessThan(0);
     });
 
     it('should treat explicit undefined identically to a missing field', () => {
       const cmp = buildComparator([
-        { field: 'x', direction: 'ASC', type: 'numeric' },
+        { field: 'x', direction: 'ASC', compare: 'numeric' },
       ]);
       expect(cmp({ x: undefined }, {})).toBe(0);
     });
@@ -289,7 +289,7 @@ describe('buildComparator', () => {
   // -----------------------------------------------------------------------
   describe('boolean values in numeric sort', () => {
     const numKey: SortKey[] = [
-      { field: 'v', direction: 'ASC', type: 'numeric' },
+      { field: 'v', direction: 'ASC', compare: 'numeric' },
     ];
 
     it('should coerce true to 1 and false to 0', () => {
@@ -310,7 +310,7 @@ describe('buildComparator', () => {
   // -----------------------------------------------------------------------
   describe('Infinity and extreme numbers', () => {
     const numKey: SortKey[] = [
-      { field: 'v', direction: 'ASC', type: 'numeric' },
+      { field: 'v', direction: 'ASC', compare: 'numeric' },
     ];
 
     it('should sort Infinity after finite numbers', () => {
@@ -344,7 +344,7 @@ describe('buildComparator', () => {
   // -----------------------------------------------------------------------
   describe('dateTime edge cases', () => {
     const dateKey: SortKey[] = [
-      { field: 'dt', direction: 'ASC', type: 'dateTime' },
+      { field: 'dt', direction: 'ASC', compare: 'dateTime' },
     ];
 
     it('should handle ISO string with timezone offset', () => {
@@ -435,20 +435,104 @@ describe('buildComparator', () => {
   });
 
   // -----------------------------------------------------------------------
-  // fieldTypes parameter
+  // Custom comparator function
   // -----------------------------------------------------------------------
-  describe('fieldTypes parameter', () => {
-    it('should resolve dateTime from fieldTypes when SortKey.type is omitted', () => {
-      const fieldTypes: FieldTypeMap = { dt: 'dateTime' };
+  describe('custom comparator function', () => {
+    it('should use a function passed as compare', () => {
+      const parseSexAge = (v: unknown): { sex: string; age: number } => {
+        if (typeof v !== 'string') return { sex: '', age: 0 };
+        const [sex = '', ageStr = '0'] = v.split('/').map((s) => s.trim());
+        return { sex, age: Number(ageStr) || 0 };
+      };
+      const compareSexAge = (a: unknown, b: unknown): number => {
+        const pa = parseSexAge(a);
+        const pb = parseSexAge(b);
+        const sexCmp = pa.sex.localeCompare(pb.sex);
+        if (sexCmp !== 0) return sexCmp;
+        return pa.age - pb.age;
+      };
+
+      const keys: SortKey[] = [
+        { field: 'sexAge', direction: 'ASC', compare: compareSexAge },
+      ];
+      const rows = [
+        { sexAge: 'M / 30' },
+        { sexAge: 'F / 25' },
+        { sexAge: 'M / 18' },
+        { sexAge: 'F / 40' },
+      ];
+      const sorted = sort(rows, keys);
+      expect(sorted.map((r) => r.sexAge)).toEqual([
+        'F / 25',
+        'F / 40',
+        'M / 18',
+        'M / 30',
+      ]);
+    });
+
+    it('should apply DESC direction to custom comparator result', () => {
+      const compareLength = (a: unknown, b: unknown): number =>
+        String(a ?? '').length - String(b ?? '').length;
+
+      const keys: SortKey[] = [
+        { field: 'v', direction: 'DESC', compare: compareLength },
+      ];
+      const rows = [{ v: 'ab' }, { v: 'abcde' }, { v: 'a' }];
+      const sorted = sort(rows, keys);
+      expect(sorted.map((r) => r.v)).toEqual(['abcde', 'ab', 'a']);
+    });
+
+    it('should work as part of multi-key sort', () => {
+      const parseAge = (v: unknown): number => {
+        if (typeof v !== 'string') return 0;
+        const parts = v.split('/').map((s) => s.trim());
+        return Number(parts[1]) || 0;
+      };
+      const compareByAge = (a: unknown, b: unknown): number =>
+        parseAge(a) - parseAge(b);
+
+      const keys: SortKey[] = [
+        { field: 'ward', direction: 'ASC' },
+        { field: 'sexAge', direction: 'ASC', compare: compareByAge },
+      ];
+      const rows = [
+        { ward: 'A', sexAge: 'M / 30' },
+        { ward: 'A', sexAge: 'F / 18' },
+        { ward: 'B', sexAge: 'M / 25' },
+      ];
+      const sorted = sort(rows, keys);
+      expect(sorted).toEqual([
+        { ward: 'A', sexAge: 'F / 18' },
+        { ward: 'A', sexAge: 'M / 30' },
+        { ward: 'B', sexAge: 'M / 25' },
+      ]);
+    });
+
+    it('should resolve custom function from fieldCompares map', () => {
+      const compareLength = (a: unknown, b: unknown): number =>
+        String(a ?? '').length - String(b ?? '').length;
+
+      const fieldCompares: FieldCompareMap = { v: compareLength };
+      const keys: SortKey[] = [{ field: 'v', direction: 'ASC' }];
+      const rows = [{ v: 'abc' }, { v: 'a' }, { v: 'ab' }];
+      const sorted = sort(rows, keys, fieldCompares);
+      expect(sorted.map((r) => r.v)).toEqual(['a', 'ab', 'abc']);
+    });
+  });
+
+  // -----------------------------------------------------------------------
+  // fieldCompares parameter
+  // -----------------------------------------------------------------------
+  describe('fieldCompares parameter', () => {
+    it('should resolve dateTime from fieldCompares when SortKey.compare is omitted', () => {
+      const fieldCompares: FieldCompareMap = { dt: 'dateTime' };
       const keys: SortKey[] = [{ field: 'dt', direction: 'ASC' }];
       const rows = [
         { dt: new Date('2024-06-15') },
         { dt: new Date('2024-01-01') },
         { dt: new Date('2024-03-10') },
       ];
-      // String sort would treat Date objects as '' (non-string) → all equal → original order preserved.
-      // dateTime sort orders by timestamp, proving the fieldTypes mapping works.
-      const sorted = sort(rows, keys, fieldTypes);
+      const sorted = sort(rows, keys, fieldCompares);
       expect(sorted.map((r) => (r.dt as Date).toISOString())).toEqual([
         '2024-01-01T00:00:00.000Z',
         '2024-03-10T00:00:00.000Z',
@@ -456,32 +540,30 @@ describe('buildComparator', () => {
       ]);
     });
 
-    it('should resolve numeric type from fieldTypes', () => {
-      const fieldTypes: FieldTypeMap = { score: 'numeric' };
+    it('should resolve numeric from fieldCompares', () => {
+      const fieldCompares: FieldCompareMap = { score: 'numeric' };
       const keys: SortKey[] = [{ field: 'score', direction: 'ASC' }];
       const rows = [{ score: 10 }, { score: 9 }, { score: 20 }];
-      expect(sort(rows, keys, fieldTypes).map((r) => r.score)).toEqual([9, 10, 20]);
+      expect(sort(rows, keys, fieldCompares).map((r) => r.score)).toEqual([9, 10, 20]);
     });
 
-    it('should let SortKey.type override fieldTypes', () => {
-      const fieldTypes: FieldTypeMap = { v: 'numeric' };
-      const keys: SortKey[] = [{ field: 'v', direction: 'ASC', type: 'string' }];
+    it('should let SortKey.compare override fieldCompares', () => {
+      const fieldCompares: FieldCompareMap = { v: 'numeric' };
+      const keys: SortKey[] = [{ field: 'v', direction: 'ASC', compare: 'string' }];
       const rows = [{ v: '10' }, { v: '9' }, { v: '20' }];
-      // String sort: '10' < '20' < '9' (lexicographic)
-      expect(sort(rows, keys, fieldTypes).map((r) => r.v)).toEqual(['10', '20', '9']);
+      expect(sort(rows, keys, fieldCompares).map((r) => r.v)).toEqual(['10', '20', '9']);
     });
 
-    it('should default to string when field is absent from fieldTypes', () => {
-      const fieldTypes: FieldTypeMap = { other: 'numeric' };
+    it('should default to string when field is absent from fieldCompares', () => {
+      const fieldCompares: FieldCompareMap = { other: 'numeric' };
       const keys: SortKey[] = [{ field: 'v', direction: 'ASC' }];
       const rows = [{ v: '10' }, { v: '9' }, { v: '20' }];
-      // String sort: '10' < '20' < '9'
-      expect(sort(rows, keys, fieldTypes).map((r) => r.v)).toEqual(['10', '20', '9']);
+      expect(sort(rows, keys, fieldCompares).map((r) => r.v)).toEqual(['10', '20', '9']);
     });
 
-    it('should work without fieldTypes (backward compat)', () => {
+    it('should work without fieldCompares (backward compat)', () => {
       const keys: SortKey[] = [
-        { field: 'dt', direction: 'ASC', type: 'dateTime' },
+        { field: 'dt', direction: 'ASC', compare: 'dateTime' },
       ];
       const rows = [{ dt: '2024-06-15' }, { dt: '2024-01-01' }];
       expect(sort(rows, keys).map((r) => r.dt)).toEqual([
@@ -490,8 +572,8 @@ describe('buildComparator', () => {
       ]);
     });
 
-    it('should apply fieldTypes across multi-key sorts', () => {
-      const fieldTypes: FieldTypeMap = { dt: 'dateTime', priority: 'numeric' };
+    it('should apply fieldCompares across multi-key sorts', () => {
+      const fieldCompares: FieldCompareMap = { dt: 'dateTime', priority: 'numeric' };
       const keys: SortKey[] = [
         { field: 'dt', direction: 'ASC' },
         { field: 'priority', direction: 'DESC' },
@@ -501,7 +583,7 @@ describe('buildComparator', () => {
         { dt: '2024-01-01', priority: 3 },
         { dt: '2024-06-15', priority: 2 },
       ];
-      const sorted = sort(rows, keys, fieldTypes);
+      const sorted = sort(rows, keys, fieldCompares);
       expect(sorted).toEqual([
         { dt: '2024-01-01', priority: 3 },
         { dt: '2024-01-01', priority: 1 },
@@ -511,40 +593,40 @@ describe('buildComparator', () => {
   });
 });
 
-describe('buildFieldTypeMap', () => {
+describe('buildFieldCompareMap', () => {
   it('should map number column type to numeric', () => {
     const cols: GridColDef[] = [
       { field: 'score', type: 'number', headerName: 'Score', width: 100 },
     ];
-    expect(buildFieldTypeMap(cols)).toEqual({ score: 'numeric' });
+    expect(buildFieldCompareMap(cols)).toEqual({ score: 'numeric' });
   });
 
   it('should map date column type to dateTime', () => {
     const cols: GridColDef[] = [
       { field: 'dt', type: 'date', headerName: 'Date', width: 100 },
     ];
-    expect(buildFieldTypeMap(cols)).toEqual({ dt: 'dateTime' });
+    expect(buildFieldCompareMap(cols)).toEqual({ dt: 'dateTime' });
   });
 
   it('should map dateTime column type to dateTime', () => {
     const cols: GridColDef[] = [
       { field: 'dt', type: 'dateTime', headerName: 'DateTime', width: 100 },
     ];
-    expect(buildFieldTypeMap(cols)).toEqual({ dt: 'dateTime' });
+    expect(buildFieldCompareMap(cols)).toEqual({ dt: 'dateTime' });
   });
 
   it('should omit string columns (default fallback)', () => {
     const cols: GridColDef[] = [
       { field: 'name', type: 'string', headerName: 'Name', width: 100 },
     ];
-    expect(buildFieldTypeMap(cols)).toEqual({});
+    expect(buildFieldCompareMap(cols)).toEqual({});
   });
 
   it('should omit columns with no type', () => {
     const cols: GridColDef[] = [
       { field: 'name', headerName: 'Name', width: 100 },
     ];
-    expect(buildFieldTypeMap(cols)).toEqual({});
+    expect(buildFieldCompareMap(cols)).toEqual({});
   });
 
   it('should handle mixed column types', () => {
@@ -554,14 +636,14 @@ describe('buildFieldTypeMap', () => {
       { field: 'admissionDtm', type: 'dateTime', headerName: 'Admission', width: 200 },
       { field: 'ward', type: 'string', headerName: 'Ward', width: 60 },
     ];
-    expect(buildFieldTypeMap(cols)).toEqual({
+    expect(buildFieldCompareMap(cols)).toEqual({
       age: 'numeric',
       admissionDtm: 'dateTime',
     });
   });
 
   it('should return empty map for empty columns', () => {
-    expect(buildFieldTypeMap([])).toEqual({});
+    expect(buildFieldCompareMap([])).toEqual({});
   });
 
   it('should ignore boolean and singleSelect types', () => {
@@ -569,6 +651,6 @@ describe('buildFieldTypeMap', () => {
       { field: 'active', type: 'boolean', headerName: 'Active', width: 80 },
       { field: 'status', type: 'singleSelect', headerName: 'Status', width: 100 },
     ];
-    expect(buildFieldTypeMap(cols)).toEqual({});
+    expect(buildFieldCompareMap(cols)).toEqual({});
   });
 });

@@ -32,5 +32,6 @@ export type {
   SortOption,
   SortKey,
   SortDirection,
-  SortFieldType,
+  SortComparePreset,
+  SortCompare,
 } from './utils/sort-comparators';

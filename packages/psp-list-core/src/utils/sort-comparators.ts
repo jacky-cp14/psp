@@ -2,22 +2,28 @@ import type { GridColDef } from '@mui/x-data-grid-pro';
 
 export type SortDirection = 'ASC' | 'DESC';
 
-/**
- * How to project a raw field value into something comparable.
- * - 'string'   — locale string compare (default)
- * - 'numeric'  — coerce to number, NaN → 0
- * - 'dateTime' — parse ISO-ish string to timestamp (handles 'Y-m-d H:i:s.u')
- */
-export type SortFieldType = 'string' | 'numeric' | 'dateTime';
+/** Built-in comparison presets. */
+export type SortComparePreset = 'string' | 'numeric' | 'dateTime';
 
-/** Maps field names to their sort value projection. */
-export type FieldTypeMap = Record<string, SortFieldType>;
+/**
+ * How to compare two raw field values.
+ *
+ * - `'string'`   — locale string compare (default)
+ * - `'numeric'`  — coerce to number, NaN → 0
+ * - `'dateTime'` — parse ISO-ish string to timestamp (handles `'Y-m-d H:i:s.u'`)
+ * - `(a, b) => number` — custom comparator for non-standard values
+ *   (direction is still applied automatically)
+ */
+export type SortCompare = SortComparePreset | ((a: unknown, b: unknown) => number);
+
+/** Maps field names to their comparison strategy. */
+export type FieldCompareMap = Record<string, SortCompare>;
 
 export interface SortKey {
   field: string;
   direction: SortDirection;
-  /** Value projection override. Resolved from column type when omitted. */
-  type?: SortFieldType;
+  /** Comparison override. Resolved from column type when omitted. */
+  compare?: SortCompare;
 }
 
 export interface SortOption {
@@ -64,9 +70,10 @@ function cmpNum(a: number, b: number): number {
 function compareValues(
   a: unknown,
   b: unknown,
-  type: SortFieldType = 'string',
+  compare: SortCompare = 'string',
 ): number {
-  switch (type) {
+  if (typeof compare === 'function') return compare(a, b);
+  switch (compare) {
     case 'numeric':
       return cmpNum(toNum(a), toNum(b));
     case 'dateTime':
@@ -81,15 +88,15 @@ function compareValues(
 // ---------------------------------------------------------------------------
 
 /**
- * Builds a `FieldTypeMap` from MUI column definitions.
+ * Builds a `FieldCompareMap` from MUI column definitions.
  *
- * Maps `GridColDef.type` to our `SortFieldType`:
+ * Maps `GridColDef.type` to a `SortComparePreset`:
  * - `'number'`               → `'numeric'`
  * - `'date'` / `'dateTime'`  → `'dateTime'`
  * - everything else is omitted (defaults to `'string'`)
  */
-export function buildFieldTypeMap(columns: GridColDef[]): FieldTypeMap {
-  const map: FieldTypeMap = {};
+export function buildFieldCompareMap(columns: GridColDef[]): Record<string, SortComparePreset> {
+  const map: Record<string, SortComparePreset> = {};
   for (const col of columns) {
     if (col.type === 'number') map[col.field] = 'numeric';
     else if (col.type === 'date' || col.type === 'dateTime') map[col.field] = 'dateTime';
@@ -102,28 +109,29 @@ export function buildFieldTypeMap(columns: GridColDef[]): FieldTypeMap {
  *
  * Keys are evaluated in priority order: the first key whose values differ
  * decides the outcome. Each key specifies a `field` to read from the object,
- * a `direction` (`ASC` | `DESC`), and an optional `type` that controls value
- * projection (`'string'` locale compare, `'numeric'`, or `'dateTime'` timestamp).
+ * a `direction` (`ASC` | `DESC`), and an optional `compare` — either a preset
+ * (`'string'`, `'numeric'`, `'dateTime'`) or a custom `(a, b) => number`
+ * comparator for non-standard values.
  *
- * Type resolution per key: `key.type` > `fieldTypes[key.field]` > `'string'`.
+ * Compare resolution per key: `key.compare` > `fieldCompares[key.field]` > `'string'`.
  *
  * @example
  * const cmp = buildComparator([
- *   { field: 'priority', direction: 'ASC', type: 'numeric' },
+ *   { field: 'priority', direction: 'ASC', compare: 'numeric' },
  *   { field: 'name',     direction: 'ASC' },
+ *   { field: 'sexAge',   direction: 'ASC', compare: (a, b) => { ... } },
  * ]);
- * rows.sort(cmp); // primary: priority ↑, tiebreaker: name A-Z
  */
 export function buildComparator<T = Record<string, unknown>>(
   keys: SortKey[],
-  fieldTypes?: FieldTypeMap,
+  fieldCompares?: FieldCompareMap,
 ): (a: T, b: T) => number {
   return (a, b) => {
-    for (const { field, direction, type } of keys) {
-      const resolvedType = type ?? fieldTypes?.[field] ?? 'string';
+    for (const { field, direction, compare } of keys) {
+      const resolved = compare ?? fieldCompares?.[field] ?? 'string';
       const va = (a as Record<string, unknown>)[field];
       const vb = (b as Record<string, unknown>)[field];
-      const cmp = compareValues(va, vb, resolvedType);
+      const cmp = compareValues(va, vb, resolved);
       if (cmp !== 0) return direction === 'DESC' ? -cmp : cmp;
     }
     return 0;
