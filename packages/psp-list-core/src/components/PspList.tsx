@@ -93,12 +93,6 @@ export function PspList<T extends { id: string }>({
     onPatientSelect,
   });
 
-  const [langMode, setLangMode] = useState<0 | 1>(0);
-  const [frameMode, setFrameMode] = useState<0 | 1>(0);
-
-  const toggleLang = useCallback(() => setLangMode((p) => (p === 0 ? 1 : 0)), []);
-  const toggleFrame = useCallback(() => setFrameMode((p) => (p === 0 ? 1 : 0)), []);
-
   const contextValue: PspListContextValue = useMemo(
     () => ({
       rows: processedRows,
@@ -106,17 +100,12 @@ export function PspList<T extends { id: string }>({
       currentSortIndex,
       sortModel,
       setSortModel,
-      langMode,
-      frameMode,
       setSelectedRowId: setSelectedRowId as (id: GridRowId | null) => void,
       setSortIndex: handleSetSortIndex,
-      toggleLang,
-      toggleFrame,
     }),
     [
       processedRows, selectedRowId, currentSortIndex, sortModel,
-      langMode, frameMode,
-      setSelectedRowId, handleSetSortIndex, toggleLang, toggleFrame,
+      setSelectedRowId, handleSetSortIndex,
     ],
   );
 

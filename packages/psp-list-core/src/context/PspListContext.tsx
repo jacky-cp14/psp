@@ -12,18 +12,10 @@ export interface PspListContextValue {
   sortModel: GridSortModel;
   /** Set column header sort model (from header click) */
   setSortModel: (model: GridSortModel) => void;
-  /** Language mode: 0 = English, 1 = Chinese */
-  langMode: 0 | 1;
-  /** Frame mode: 0 = Expand, 1 = Reduce */
-  frameMode: 0 | 1;
   /** Set selected row (from row click) */
   setSelectedRowId: (id: GridRowId | null) => void;
   /** Set sort option index (context menu; clears sortModel so menu sort applies). null = unsorted. */
   setSortIndex: (index: number | null) => void;
-  /** Toggle language mode */
-  toggleLang: () => void;
-  /** Toggle frame mode */
-  toggleFrame: () => void;
 }
 
 const PspListContext = createContext<PspListContextValue | null>(null);
