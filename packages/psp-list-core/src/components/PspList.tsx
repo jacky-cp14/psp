@@ -9,6 +9,7 @@ import type { PspListContextValue } from '../context/PspListContext';
 import { PspListProvider } from '../context/PspListContext';
 import { useSort } from '../hooks/useSort';
 import { usePatientSelection } from '../hooks/usePatientSelection';
+import { emitPatientSelect } from '../events/pspEventBus';
 import { DualGrid } from './DualGrid';
 import { SortMenu } from './SortMenu';
 
@@ -23,8 +24,8 @@ export interface PspListProps<T extends { id: string } = { id: string }> {
   sortOptions: SortOption[];
   /** Index into sortOptions for initial sort. null = preserve server order. */
   defaultSortIndex?: number | null;
-  /** Called on double-click or Enter — the "submit" action. */
-  onPatientSelect: (patient: T) => void;
+  /** Optional local callback on double-click or Enter. The event bus is always notified. */
+  onPatientSelect?: (patient: T) => void;
   /** Initial left/right panel split percentage. */
   defaultSplit?: number;
   /** Row height in px (default 28). */
@@ -88,9 +89,17 @@ export function PspList<T extends { id: string }>({
     [setSortIndex],
   );
 
+  const handlePatientSelect = useCallback(
+    (patient: T) => {
+      onPatientSelect?.(patient);
+      emitPatientSelect(patient);
+    },
+    [onPatientSelect],
+  );
+
   const { selectedRowId, setSelectedRowId, onPatientSubmit } = usePatientSelection<T>({
     rows: processedRows,
-    onPatientSelect,
+    onPatientSelect: handlePatientSelect,
   });
 
   const contextValue: PspListContextValue = useMemo(

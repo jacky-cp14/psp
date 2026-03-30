@@ -2,7 +2,7 @@
 
 MUI DataGrid wrapper for the dual-grid patient list layout. It takes rows and columns as props and renders the split-panel grid.
 
-Includes keyboard navigation, multi-key sorting, a print dialog, and a shared global store.
+Includes keyboard navigation, multi-key sorting, a print dialog, a shared global store, and a singleton event bus so the host can react to patient selection from federated list plugins.
 
 ## Basic usage
 
@@ -38,7 +38,7 @@ const sortOptions: SortOption[] = [
   },
 ];
 
-function NormalPatientList({ rows, onPatientSelect }) {
+function NormalPatientList({ rows }: { rows: { id: string }[] }) {
   return (
     <>
       <SelectionPanel>Normal Patient List</SelectionPanel>
@@ -48,14 +48,13 @@ function NormalPatientList({ rows, onPatientSelect }) {
         rightColumns={rightColumns}
         sortOptions={sortOptions}
         defaultSortIndex={0}
-        onPatientSelect={onPatientSelect}
       />
     </>
   );
 }
 ```
 
-`PspList` renders the dual-grid layout with keyboard navigation (Arrow keys, Home/End, PgUp/PgDn, Enter to submit), a right-click sort menu, sticky column headers, and theming.
+`PspList` renders the dual-grid layout with keyboard navigation (Arrow keys, Home/End, PgUp/PgDn, Enter to submit), a right-click sort menu, sticky column headers, and theming. On double-click or Enter it notifies a **module-scoped patient-select bus** (see [Patient select](#patient-select-module-federation)) so the host can listen without wiring props through remotes. Pass `onPatientSelect` only when the list plugin needs an extra local callback; it runs **before** `usePatientSelectEvent` listeners in the shell.
 
 Every row must have an `id: string` field.
 
@@ -158,6 +157,28 @@ const unsub = usePspGlobal.subscribe((state) => {
 
 Add the field to `PspGlobalState` in `packages/psp-list-core/src/store/pspGlobalStore.ts` and set its default in the `create()` call. It becomes available through `setPspState` immediately.
 
+### Patient select (Module Federation)
+
+When the list runs inside a remote and the shell cannot pass callbacks through props, the host subscribes with `usePatientSelectEvent`. `PspList` notifies the shared singleton bus internally on submit (double-click or Enter). There is no separate `emit` API for plugins to call.
+
+**Order:** (1) optional `onPatientSelect` on that `PspList` (plugin-local), (2) all `usePatientSelectEvent` listeners (e.g. host shell). With `@psp/core` shared as `singleton: true`, host and remotes share one listener set.
+
+**Host (shell):**
+
+```tsx
+import { usePatientSelectEvent } from '@psp/core';
+
+function AppShell() {
+  usePatientSelectEvent((patient) => {
+    // navigate, open chart, sync CMS session, etc.
+    console.log('Selected patient', patient);
+  });
+  return <RemoteListSlot />;
+}
+```
+
+**Remote (list plugin):** render `PspList` as usual. No wiring is required for the host to receive events. Pass `onPatientSelect` only if the plugin needs extra local handling; it runs before host listeners.
+
 ### Customizing appearance
 
 Row height (default 28px):
@@ -206,10 +227,12 @@ interface MyPatient {
 
 <PspList<MyPatient>
   rows={patients}
-  onPatientSelect={(patient) => openChart(patient.wardCode)}
+  onPatientSelect={(patient) => trackLocalSelection(patient)}
   {...rest}
 />
 ```
+
+`onPatientSelect` is optional. Omit it when only the host needs to react — use `usePatientSelectEvent` in the shell instead.
 
 ### Exported types
 
@@ -219,6 +242,9 @@ PspListProps, SelectionPanelProps, PrintDialogProps, PrintVariant
 
 // Global store
 PspGlobalStore, PspGlobalState, PspGlobalActions, LangMode, FrameMode
+
+// Hooks (also exported as functions)
+usePspGlobal, usePatientSelectEvent
 
 // Sorting
 SortOption, SortKey, SortDirection, SortComparePreset, SortCompare
@@ -237,7 +263,7 @@ SortOption, SortKey, SortDirection, SortComparePreset, SortCompare
 | `rightColumns` | `GridColDef[]` | — | Right grid columns (details). |
 | `sortOptions` | `SortOption[]` | — | Right-click sort presets. |
 | `defaultSortIndex` | `number \| null` | `null` | Initial sort preset index. `null` preserves server order. |
-| `onPatientSelect` | `(patient: T) => void` | — | Called on double-click or Enter. |
+| `onPatientSelect` | `(patient: T) => void` | — | Optional. Local callback on double-click or Enter; runs before host `usePatientSelectEvent` listeners. |
 | `defaultSplit` | `number` | `35` | Left panel width (%). |
 | `rowHeight` | `number` | `28` | Row height in px. |
 | `colorScheme` | `RowColorScheme` | `'gray'` | Alternating row color scheme. |
@@ -292,6 +318,16 @@ const store = usePspGlobal();
 | `setCurrentWard(ward)` | Update `currentWard`. Called by list ward combo on select. |
 
 The library does not fetch ward data. The consuming app must obtain the user's default ward (from a backend API or CMS session) and call `setDefaultWard(ward)` at plugin activation.
+
+### `usePatientSelectEvent`
+
+Subscribe in the host (or any component) to patient submit events from any `PspList` in the same singleton `@psp/core` instance. Fires after that list’s optional `onPatientSelect` (if any). The handler ref updates every render; you do not need `useCallback` on it. Unsubscribe runs on unmount.
+
+```tsx
+usePatientSelectEvent<MyPatient>((patient) => {
+  navigate(`/chart/${patient.id}`);
+});
+```
 
 ---
 
@@ -357,7 +393,7 @@ new ModuleFederationPlugin({
 });
 ```
 
-`singleton: true` ensures one copy of the package and one store instance across all plugins. `eager: true` on the host makes the store available before any remote initializes.
+`singleton: true` ensures one copy of the package, one Zustand store, and one patient-select event bus across all plugins. `eager: true` on the host makes shared module state available before any remote initializes.
 
 ### Troubleshooting
 

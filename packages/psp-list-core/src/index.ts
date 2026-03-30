@@ -27,6 +27,9 @@ export type {
   FrameMode,
 } from './store';
 
+// Event bus (singleton across all federated plugins)
+export { usePatientSelectEvent } from './events/pspEventBus';
+
 // Sort preset types
 export type {
   SortOption,
