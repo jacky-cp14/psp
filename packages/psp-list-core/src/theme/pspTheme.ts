@@ -83,7 +83,7 @@ export const pspTheme = createTheme({
           fontWeight: 700,
           fontSize: `${tokens.typography.headerFontSize}px`,
           lineHeight: 1.2,
-          borderBottom: `1px solid ${tokens.color.header.borderBottom}`,
+          borderBottom: `1.5px solid ${tokens.color.header.borderRight}`,
         },
         columnHeader: {
           background: "transparent",
@@ -93,6 +93,7 @@ export const pspTheme = createTheme({
           padding: "0 8px",
           display: "flex",
           alignItems: "center",
+          borderRight: `3px solid ${tokens.color.header.borderRight}`,
           "&:focus": { outline: "none" },
           "&:focus-within": { outline: "none" },
         },
@@ -101,8 +102,9 @@ export const pspTheme = createTheme({
           fontSize: `${tokens.typography.headerFontSize}px`,
         },
         columnSeparator: {
-          color: tokens.color.border,
-          "&:hover": { color: tokens.color.header.text },
+          /** Line is drawn on `columnHeader` borderRight; keep handle transparent until hover. */
+          color: "transparent",
+          "&:hover": { color: tokens.color.header.borderRight },
         },
         menuIconButton: {
           display: "none",

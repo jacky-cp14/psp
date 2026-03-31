@@ -9,7 +9,8 @@ export const tokens = {
     header: {
       gradientTop: "#F8F8F8",
       gradientBottom: "#CBCBCB",
-      borderBottom: "#535353",
+      /** Header row bottom band and vertical rules between header cells. */
+      borderRight: "#434343",
       text: "#800000",
     },
     cell: {
