@@ -3,6 +3,7 @@ import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { usePspGlobal } from '@psp/core';
 import type { BasePatientRecord } from './types/patient-record';
 import { List0Normal } from './lists/list0-normal';
+import { ListNormalEight } from './lists/list-normal-eight';
 import { List1Uncoded } from './lists/list1-uncoded';
 import { List2MsGopc } from './lists/list2-ms-gopc';
 import { List3MoInCharge } from './lists/list3-mo-incharge';
@@ -20,6 +21,7 @@ const queryClient = new QueryClient({
 
 const LISTS = [
   { id: 0, label: 'Normal', Component: List0Normal },
+  { id: 11, label: 'Normal (8)', Component: ListNormalEight },
   { id: 1, label: 'Uncoded', Component: List1Uncoded },
   { id: 2, label: 'MS GOPC', Component: List2MsGopc },
   { id: 3, label: 'MO In-Charge', Component: List3MoInCharge },
