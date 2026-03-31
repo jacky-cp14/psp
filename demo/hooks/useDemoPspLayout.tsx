@@ -1,5 +1,5 @@
 import { useMemo } from 'react';
-import type { GridColDef } from '@mui/x-data-grid-pro';
+import type { GridColDef, GridRenderCellParams } from '@mui/x-data-grid-pro';
 import { usePspGlobal } from '@psp/core';
 import type { FrameMode, LangMode } from '@psp/core';
 
@@ -46,6 +46,9 @@ export function namePairColumns(factor: number, langMode: LangMode): { en: GridC
       headerName: 'English Name',
       flex: 1,
       minWidth: scaleW(enMinBase, factor),
+      renderCell: (params: GridRenderCellParams) => (
+        <span style={{ fontWeight: 700 }}>{params.value}</span>
+      ),
     },
     zh: {
       field: 'chineseName',

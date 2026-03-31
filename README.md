@@ -2,7 +2,7 @@
 
 MUI DataGrid wrapper for the dual-grid patient list layout. It takes rows and columns as props and renders the split-panel grid.
 
-Includes keyboard navigation, multi-key sorting, a print dialog, a shared global store, and a singleton event bus so the host can react to patient selection from federated list plugins.
+Includes keyboard navigation, multi-key sorting, a print dialog, a shared global store, and a singleton event bus for cross-plugin communication.
 
 ## Basic usage
 
@@ -38,7 +38,7 @@ const sortOptions: SortOption[] = [
   },
 ];
 
-function NormalPatientList({ rows }: { rows: { id: string }[] }) {
+function NormalPatientList({ rows }) {
   return (
     <>
       <SelectionPanel>Normal Patient List</SelectionPanel>
@@ -54,7 +54,7 @@ function NormalPatientList({ rows }: { rows: { id: string }[] }) {
 }
 ```
 
-`PspList` renders the dual-grid layout with keyboard navigation (Arrow keys, Home/End, PgUp/PgDn, Enter to submit), a right-click sort menu, sticky column headers, and theming. On double-click or Enter it notifies a **module-scoped patient-select bus** (see [Patient select](#patient-select-module-federation)) so the host can listen without wiring props through remotes. Pass `onPatientSelect` only when the list plugin needs an extra local callback; it runs **before** `usePatientSelectEvent` listeners in the shell.
+`PspList` renders the dual-grid layout with keyboard navigation (Arrow keys, Home/End, PgUp/PgDn, Enter to submit), a right-click sort menu, sticky column headers, and theming.
 
 Every row must have an `id: string` field.
 
@@ -122,6 +122,34 @@ function ListWithPrint() {
 
 Omit `variants` for a single "Standard Print" option.
 
+### Patient select event
+
+When a user double-clicks or presses Enter on a row, `PspList` emits a patient-select event through a singleton event bus. The host app (or any other plugin) subscribes with `usePatientSelectEvent`. No manual wiring needed — the event fires automatically.
+
+```tsx
+// Host app — subscribe to patient selections from any list
+import { usePatientSelectEvent } from '@psp/core';
+
+function App() {
+  usePatientSelectEvent((patient) => {
+    navigate(`/patient/${patient.id}`);
+  });
+
+  return <Shell>{/* federated plugin slots */}</Shell>;
+}
+```
+
+The hook is ref-stable — no need to wrap the handler in `useCallback`. Subscription and cleanup are handled internally.
+
+If a plugin also needs to react locally, pass `onPatientSelect` as a prop. The local callback fires first, then the event bus notifies all subscribers.
+
+```tsx
+<PspList
+  onPatientSelect={(patient) => console.log('local:', patient.id)}
+  {...rest}
+/>
+```
+
 ### Global store
 
 When multiple plugins run in the same page (Module Federation), they need to share state like the current language and layout mode. `usePspGlobal` is a singleton store that handles this. It's created at module scope, so as long as `@psp/core` is shared as a singleton in the federation config, every plugin reads and writes to the same instance.
@@ -157,28 +185,6 @@ const unsub = usePspGlobal.subscribe((state) => {
 
 Add the field to `PspGlobalState` in `packages/psp-list-core/src/store/pspGlobalStore.ts` and set its default in the `create()` call. It becomes available through `setPspState` immediately.
 
-### Patient select (Module Federation)
-
-When the list runs inside a remote and the shell cannot pass callbacks through props, the host subscribes with `usePatientSelectEvent`. `PspList` notifies the shared singleton bus internally on submit (double-click or Enter). There is no separate `emit` API for plugins to call.
-
-**Order:** (1) optional `onPatientSelect` on that `PspList` (plugin-local), (2) all `usePatientSelectEvent` listeners (e.g. host shell). With `@psp/core` shared as `singleton: true`, host and remotes share one listener set.
-
-**Host (shell):**
-
-```tsx
-import { usePatientSelectEvent } from '@psp/core';
-
-function AppShell() {
-  usePatientSelectEvent((patient) => {
-    // navigate, open chart, sync CMS session, etc.
-    console.log('Selected patient', patient);
-  });
-  return <RemoteListSlot />;
-}
-```
-
-**Remote (list plugin):** render `PspList` as usual. No wiring is required for the host to receive events. Pass `onPatientSelect` only if the plugin needs extra local handling; it runs before host listeners.
-
 ### Customizing appearance
 
 Row height (default 28px):
@@ -208,6 +214,61 @@ Custom row classes (composed with built-in striping):
 />
 ```
 
+### Cell text styling (bold, color accent)
+
+Use MUI DataGrid's `renderCell` on any column definition to bold or color parts of a cell. The library passes columns straight through to `DataGridPro`, so any valid `GridColDef` works.
+
+Red accent text:
+
+```tsx
+const rightColumns: GridColDef[] = [
+  {
+    field: 'sourceCode',
+    headerName: 'Source Code',
+    width: 122,
+    renderCell: (params) => {
+      const isStale = daysSinceAdmission(params.row.admissionDtm) > 7;
+      return (
+        <span style={{ color: isStale ? '#f43440' : 'inherit' }}>
+          {params.value}
+        </span>
+      );
+    },
+  },
+];
+```
+
+Bold text:
+
+```tsx
+{
+  field: 'name',
+  headerName: 'English Name',
+  flex: 1,
+  renderCell: (params) => (
+    <span style={{ fontWeight: 700 }}>{params.value}</span>
+  ),
+}
+```
+
+Combined — red bold for a flag field:
+
+```tsx
+{
+  field: 'confidential',
+  headerName: 'Confide',
+  width: 80,
+  renderCell: (params) => {
+    if (params.row.accessCode % 2 === 0) {
+      return <span style={{ color: '#f43440', fontWeight: 700 }}>YES</span>;
+    }
+    return null;
+  },
+}
+```
+
+`#f43440` is the library's highlight token (`tokens.color.cell.highlight`). Use it for consistency with the PSP theme.
+
 ---
 
 ## TypeScript
@@ -227,12 +288,10 @@ interface MyPatient {
 
 <PspList<MyPatient>
   rows={patients}
-  onPatientSelect={(patient) => trackLocalSelection(patient)}
+  onPatientSelect={(patient) => openChart(patient.wardCode)}
   {...rest}
 />
 ```
-
-`onPatientSelect` is optional. Omit it when only the host needs to react — use `usePatientSelectEvent` in the shell instead.
 
 ### Exported types
 
@@ -240,11 +299,11 @@ interface MyPatient {
 // Components
 PspListProps, SelectionPanelProps, PrintDialogProps, PrintVariant
 
+// Event bus
+usePatientSelectEvent
+
 // Global store
 PspGlobalStore, PspGlobalState, PspGlobalActions, LangMode, FrameMode
-
-// Hooks (also exported as functions)
-usePspGlobal, usePatientSelectEvent
 
 // Sorting
 SortOption, SortKey, SortDirection, SortComparePreset, SortCompare
@@ -263,7 +322,7 @@ SortOption, SortKey, SortDirection, SortComparePreset, SortCompare
 | `rightColumns` | `GridColDef[]` | — | Right grid columns (details). |
 | `sortOptions` | `SortOption[]` | — | Right-click sort presets. |
 | `defaultSortIndex` | `number \| null` | `null` | Initial sort preset index. `null` preserves server order. |
-| `onPatientSelect` | `(patient: T) => void` | — | Optional. Local callback on double-click or Enter; runs before host `usePatientSelectEvent` listeners. |
+| `onPatientSelect` | `(patient: T) => void` | — | Optional local callback on double-click or Enter. The event bus is always notified regardless. |
 | `defaultSplit` | `number` | `35` | Left panel width (%). |
 | `rowHeight` | `number` | `28` | Row height in px. |
 | `colorScheme` | `RowColorScheme` | `'gray'` | Alternating row color scheme. |
@@ -287,6 +346,18 @@ Styled header bar. Pass children as the title text.
 | `onPrint` | `(variant: string) => void` | — | Called with the selected variant value. |
 | `variants` | `PrintVariant[]` | `[{ label: 'Standard Print', value: 'standard' }]` | Print format options. |
 | `title` | `string` | `'Print Patient List'` | Dialog title. |
+
+### `usePatientSelectEvent`
+
+Subscribe to patient-select events from any `PspList` instance across all federated plugins. Returns nothing — cleanup is automatic on unmount.
+
+```tsx
+import { usePatientSelectEvent } from '@psp/core';
+
+usePatientSelectEvent<MyPatient>((patient) => {
+  openChart(patient.id);
+});
+```
 
 ### `usePspGlobal`
 
@@ -318,16 +389,6 @@ const store = usePspGlobal();
 | `setCurrentWard(ward)` | Update `currentWard`. Called by list ward combo on select. |
 
 The library does not fetch ward data. The consuming app must obtain the user's default ward (from a backend API or CMS session) and call `setDefaultWard(ward)` at plugin activation.
-
-### `usePatientSelectEvent`
-
-Subscribe in the host (or any component) to patient submit events from any `PspList` in the same singleton `@psp/core` instance. Fires after that list’s optional `onPatientSelect` (if any). The handler ref updates every render; you do not need `useCallback` on it. Unsubscribe runs on unmount.
-
-```tsx
-usePatientSelectEvent<MyPatient>((patient) => {
-  navigate(`/chart/${patient.id}`);
-});
-```
 
 ---
 
@@ -393,7 +454,7 @@ new ModuleFederationPlugin({
 });
 ```
 
-`singleton: true` ensures one copy of the package, one Zustand store, and one patient-select event bus across all plugins. `eager: true` on the host makes shared module state available before any remote initializes.
+`singleton: true` ensures one copy of the package and one store instance across all plugins. `eager: true` on the host makes the store available before any remote initializes.
 
 ### Troubleshooting
 

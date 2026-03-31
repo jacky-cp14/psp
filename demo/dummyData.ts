@@ -66,6 +66,7 @@ function generateBaseRows(): NormalPatientRecord[] {
       age,
       sexAge: `${sex}/${age}`,
       sourceCode: SOURCES[sri],
+      accessCode: i % 5 === 0 ? 2 : 1,
       hkid: `${String.fromCharCode(65 + (i % 26))}${pad(123456 + i, 6)}(${(i % 10)})`,
       mrn: `MRN${pad(i, 6)}`,
     });

@@ -1,10 +1,12 @@
 import React, { useMemo } from 'react';
-import type { GridColDef } from '@mui/x-data-grid-pro';
+import type { GridColDef, GridRenderCellParams } from '@mui/x-data-grid-pro';
 import { PspList, SelectionPanel } from '@psp/core';
 import type { SortOption } from '@psp/core';
 import type { NormalPatientRecord } from '../types/patient-record';
 import { useListData } from '../hooks/useListData';
 import { orderLeadSexAgeEnZh, scaleGridColumns, scaleW, useDemoPspLayout } from '../hooks/useDemoPspLayout';
+
+const ACCENT_RED = '#f43440';
 
 const RIGHT_BASE: GridColDef[] = [
   { field: 'caseNo', headerName: 'Episode', width: 152 },
@@ -15,9 +17,27 @@ const RIGHT_BASE: GridColDef[] = [
     type: 'dateTime',
     width: 202,
   },
-  { field: 'sourceCode', headerName: 'Source Code', width: 122 },
+  {
+    field: 'sourceCode',
+    headerName: 'Source Code',
+    width: 122,
+    renderCell: (params: GridRenderCellParams) => (
+      <span style={{ color: ACCENT_RED }}>{params.value}</span>
+    ),
+  },
   { field: 'hkid', headerName: 'HKID', width: 124 },
   { field: 'mrn', headerName: 'MRN', width: 92 },
+  {
+    field: 'confidential',
+    headerName: 'Confide',
+    width: 80,
+    renderCell: (params: GridRenderCellParams) => {
+      if (params.row.accessCode % 2 === 0) {
+        return <span style={{ color: ACCENT_RED, fontWeight: 700 }}>YES</span>;
+      }
+      return null;
+    },
+  },
 ];
 
 const sortOptions: SortOption[] = [
