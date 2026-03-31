@@ -1,8 +1,13 @@
-import React, { useState, useRef, useMemo, startTransition } from "react";
+import React, {
+  useState,
+  useRef,
+  useMemo,
+  startTransition,
+  useCallback,
+} from "react";
 import { ThemeProvider } from "@mui/material/styles";
 import { DataGridPro } from "@mui/x-data-grid-pro";
 import type { GridColDef, GridRowParams } from "@mui/x-data-grid-pro";
-import { PanelGroup, Panel, PanelResizeHandle } from "react-resizable-panels";
 import { useKeyboardNavigation } from "../../packages/psp-list-core/src/hooks/useKeyboardNavigation";
 import { pspTheme } from "../../packages/psp-list-core/src/theme/pspTheme";
 import { tokens } from "../../packages/psp-list-core/src/theme/pspTokens";
@@ -153,11 +158,13 @@ function Layer2(): React.ReactElement {
   );
 }
 
-/* ─── Layer 3: Dual grids in PanelGroup (mirrors DualGrid.tsx structure) ─── */
+/* ─── Layer 3: Dual grids in horizontal flex + splitter (mirrors DualGrid.tsx) ─── */
 function Layer3(): React.ReactElement {
   const [selectedId, setSelectedId] = useState<string | null>(null);
   const scrollRef = useRef<HTMLDivElement>(null);
+  const draggingRef = useRef(false);
   const { langMode, rowHeight, columnScale, defaultSplit } = useDemoPspLayout();
+  const [leftPct, setLeftPct] = useState(defaultSplit);
   const leftCols = useMemo(() => {
     const f = columnScale;
     const ward: GridColDef = {
@@ -194,6 +201,34 @@ function Layer3(): React.ReactElement {
     scrollOffset: SCROLL_HEADER_OFFSET,
   });
 
+  const onDividerMouseDown = useCallback(
+    (e: React.MouseEvent) => {
+      e.preventDefault();
+      draggingRef.current = true;
+      const container = scrollRef.current;
+      if (!container) return;
+
+      const onMouseMove = (ev: MouseEvent) => {
+        if (!draggingRef.current) return;
+        const rect = container.getBoundingClientRect();
+        const pct = ((ev.clientX - rect.left) / rect.width) * 100;
+        setLeftPct(Math.min(80, Math.max(10, pct)));
+      };
+      const onMouseUp = () => {
+        draggingRef.current = false;
+        document.removeEventListener("mousemove", onMouseMove);
+        document.removeEventListener("mouseup", onMouseUp);
+        document.body.style.cursor = "";
+        document.body.style.userSelect = "";
+      };
+      document.addEventListener("mousemove", onMouseMove);
+      document.addEventListener("mouseup", onMouseUp);
+      document.body.style.cursor = "col-resize";
+      document.body.style.userSelect = "none";
+    },
+    [],
+  );
+
   const selectionModel = selectedId ? [selectedId] : [];
   const sharedProps = {
     rows: ROWS,
@@ -219,40 +254,28 @@ function Layer3(): React.ReactElement {
         tabIndex={0}
         onKeyDown={handleKeyDown}
       >
-        <div style={{ minHeight: contentHeight }}>
-          <PanelGroup direction="horizontal">
-            <Panel defaultSize={defaultSplit} style={{ minWidth: 0 }}>
-              <div
-                style={{
-                  minWidth: 0,
-                  overflowX: "auto",
-                  width: "100%",
-                  height: "100%",
-                }}
-              >
-                <DataGridPro {...sharedProps} columns={leftCols} />
-              </div>
-            </Panel>
-            <PanelResizeHandle
-              style={{
-                width: 4,
-                backgroundColor: "#e0e0e0",
-                cursor: "col-resize",
-              }}
-            />
-            <Panel style={{ minWidth: 0 }}>
-              <div
-                style={{
-                  minWidth: 0,
-                  overflowX: "auto",
-                  width: "100%",
-                  height: "100%",
-                }}
-              >
-                <DataGridPro {...sharedProps} columns={rightCols} />
-              </div>
-            </Panel>
-          </PanelGroup>
+        <div
+          style={{
+            minHeight: contentHeight,
+            display: "flex",
+            flexDirection: "row",
+          }}
+        >
+          <div style={{ width: `${leftPct}%`, minWidth: 0 }}>
+            <DataGridPro {...sharedProps} columns={leftCols} />
+          </div>
+          <div
+            onMouseDown={onDividerMouseDown}
+            style={{
+              width: 5.5,
+              flexShrink: 0,
+              backgroundColor: tokens.color.divider,
+              cursor: "col-resize",
+            }}
+          />
+          <div style={{ flex: 1, minWidth: 0 }}>
+            <DataGridPro {...sharedProps} columns={rightCols} />
+          </div>
         </div>
       </div>
     </ThemeProvider>

@@ -394,7 +394,7 @@ The library does not fetch ward data. The consuming app must obtain the user's d
 
 ## Architecture
 
-`PspList` wraps `ThemeProvider` → `PspListProvider` → `SortMenu` → `DualGrid`, which renders two `DataGridPro` instances with `autoHeight` inside a `PanelGroup`, wrapped by a shared scroll container.
+`PspList` wraps `ThemeProvider` → `PspListProvider` → `SortMenu` → `DualGrid`, which renders two `DataGridPro` instances with `autoHeight` in a horizontal flex row (draggable split), wrapped by a shared scroll container.
 
 Both grids expand to full height (no virtualization). A single parent div scrolls both. Column headers stay pinned via JS `transform: translateY(scrollTop)` on every scroll event.
 
@@ -483,7 +483,6 @@ Bundled dependencies (not required to install separately):
 
 - `@mui/x-data-grid-pro` v5
 - `@mui/material` v5
-- `react-resizable-panels` v2
 - `zustand` v5
 
 ---

@@ -16,7 +16,7 @@
     "paths": {
       "@psp/core": ["../packages/psp-list-core/src/index.ts"]
     },
-    "types": ["node", "vitest/globals"]
+    "types": ["node", "react", "react-dom", "vitest/globals"]
   },
   "include": [
     "./*.tsx",
