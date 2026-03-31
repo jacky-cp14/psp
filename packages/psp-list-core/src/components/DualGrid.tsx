@@ -1,7 +1,12 @@
-import React, { useRef, useCallback, useEffect, startTransition } from "react";
+import React, {
+  useRef,
+  useState,
+  useCallback,
+  useEffect,
+  startTransition,
+} from "react";
 import { DataGridPro } from "@mui/x-data-grid-pro";
 import type { GridColDef, GridRowParams } from "@mui/x-data-grid-pro";
-import { PanelGroup, Panel, PanelResizeHandle } from "react-resizable-panels";
 import { usePspList } from "../context/PspListContext";
 import { useKeyboardNavigation } from "../hooks/useKeyboardNavigation";
 import type { RowColorScheme } from "../utils/row-styling";
@@ -9,7 +14,10 @@ import { getRowClass } from "../utils/row-styling";
 import { tokens } from "../theme/pspTokens";
 
 /** Default row height when `rowHeight` is omitted. Keep in sync with demo `DEMO_ROW_HEIGHT_BASE`. */
-const DEFAULT_ROW_HEIGHT = 41;
+const DEFAULT_ROW_HEIGHT = 38;
+
+/** DataGrid root top border (1px) + column header row — must match `tokens.typography.headerRowHeight`. */
+const SCROLL_HEADER_OFFSET = 1 + tokens.typography.headerRowHeight;
 
 export interface DualGridProps {
   leftColumns: GridColDef[];
@@ -39,8 +47,11 @@ export function DualGrid({
   getRowClassName: customGetRowClassName,
   onRowDoubleClick,
 }: DualGridProps): React.ReactElement {
-  const { rows, selectedRowId, setSelectedRowId, sortModel, setSortModel } = usePspList();
+  const { rows, selectedRowId, setSelectedRowId, sortModel, setSortModel } =
+    usePspList();
   const scrollContainerRef = useRef<HTMLDivElement>(null);
+  const [leftPct, setLeftPct] = useState(defaultSplit);
+  const draggingRef = useRef(false);
 
   const selectedIndex =
     selectedRowId !== null
@@ -57,19 +68,23 @@ export function DualGrid({
     onSubmit: () => onRowDoubleClick?.(),
     scrollContainerRef: scrollContainerRef as React.RefObject<HTMLDivElement>,
     rowHeight,
-    scrollOffset: 57,
+    scrollOffset: SCROLL_HEADER_OFFSET,
   });
 
   const highlightRowVisually = useCallback(
     (rowId: string) => {
       const container = scrollContainerRef.current;
       if (!container) return;
-      container.querySelectorAll('.MuiDataGrid-row.Mui-selected').forEach((el) => {
-        el.classList.remove('Mui-selected');
-      });
-      container.querySelectorAll(`.MuiDataGrid-row[data-id="${rowId}"]`).forEach((el) => {
-        el.classList.add('Mui-selected');
-      });
+      container
+        .querySelectorAll(".MuiDataGrid-row.Mui-selected")
+        .forEach((el) => {
+          el.classList.remove("Mui-selected");
+        });
+      container
+        .querySelectorAll(`.MuiDataGrid-row[data-id="${rowId}"]`)
+        .forEach((el) => {
+          el.classList.add("Mui-selected");
+        });
     },
     [scrollContainerRef],
   );
@@ -78,13 +93,41 @@ export function DualGrid({
     const container = scrollContainerRef.current;
     if (!container) return;
     const onMouseDown = (e: MouseEvent) => {
-      const row = (e.target as HTMLElement).closest('.MuiDataGrid-row');
-      const rowId = row?.getAttribute('data-id');
+      const row = (e.target as HTMLElement).closest(".MuiDataGrid-row");
+      const rowId = row?.getAttribute("data-id");
       if (rowId) highlightRowVisually(rowId);
     };
-    container.addEventListener('mousedown', onMouseDown);
-    return () => container.removeEventListener('mousedown', onMouseDown);
+    container.addEventListener("mousedown", onMouseDown);
+    return () => container.removeEventListener("mousedown", onMouseDown);
   }, [highlightRowVisually]);
+
+  const onDividerMouseDown = useCallback(
+    (e: React.MouseEvent) => {
+      e.preventDefault();
+      draggingRef.current = true;
+      const container = scrollContainerRef.current;
+      if (!container) return;
+
+      const onMouseMove = (ev: MouseEvent) => {
+        if (!draggingRef.current) return;
+        const rect = container.getBoundingClientRect();
+        const pct = ((ev.clientX - rect.left) / rect.width) * 100;
+        setLeftPct(Math.min(80, Math.max(10, pct)));
+      };
+      const onMouseUp = () => {
+        draggingRef.current = false;
+        document.removeEventListener("mousemove", onMouseMove);
+        document.removeEventListener("mouseup", onMouseUp);
+        document.body.style.cursor = "";
+        document.body.style.userSelect = "";
+      };
+      document.addEventListener("mousemove", onMouseMove);
+      document.addEventListener("mouseup", onMouseUp);
+      document.body.style.cursor = "col-resize";
+      document.body.style.userSelect = "none";
+    },
+    [],
+  );
 
   const handleRowClick = useCallback(
     (params: GridRowParams) => {
@@ -109,9 +152,12 @@ export function DualGrid({
 
   const composedGetRowClassName = useCallback(
     (params: { indexRelativeToCurrentPage: number } & GridRowParams) => {
-      const colorClass = getRowClass(params.indexRelativeToCurrentPage, colorScheme);
-      const customClass = customGetRowClassName?.(params) ?? '';
-      return [colorClass, customClass].filter(Boolean).join(' ');
+      const colorClass = getRowClass(
+        params.indexRelativeToCurrentPage,
+        colorScheme,
+      );
+      const customClass = customGetRowClassName?.(params) ?? "";
+      return [colorClass, customClass].filter(Boolean).join(" ");
     },
     [colorScheme, customGetRowClassName],
   );
@@ -125,7 +171,7 @@ export function DualGrid({
     disableColumnFilter: true,
     disableColumnSelector: true,
     disableColumnSorting: false,
-    sortingMode: 'client' as const,
+    sortingMode: "client" as const,
     sortModel,
     onSortModelChange: handleSortModelChange,
     selectionModel,
@@ -156,30 +202,36 @@ export function DualGrid({
         onKeyDown={handleKeyDown}
         data-testid="dual-grid-container"
       >
-        <div style={{ minHeight: contentMinHeight }}>
-          <PanelGroup direction="horizontal">
-            <Panel defaultSize={defaultSplit}>
-              <DataGridPro
-                {...sharedGridProps}
-                columns={leftColumns}
-                data-testid="left-grid"
-              />
-            </Panel>
-            <PanelResizeHandle
-              style={{
-                width: 5.5,
-                backgroundColor: tokens.color.divider,
-                cursor: "col-resize",
-              }}
+        <div
+          style={{
+            minHeight: contentMinHeight,
+            display: "flex",
+            flexDirection: "row",
+          }}
+        >
+          <div style={{ width: `${leftPct}%`, minWidth: 0 }}>
+            <DataGridPro
+              {...sharedGridProps}
+              columns={leftColumns}
+              data-testid="left-grid"
             />
-            <Panel>
-              <DataGridPro
-                {...sharedGridProps}
-                columns={rightColumns}
-                data-testid="right-grid"
-              />
-            </Panel>
-          </PanelGroup>
+          </div>
+          <div
+            onMouseDown={onDividerMouseDown}
+            style={{
+              width: 5.5,
+              flexShrink: 0,
+              backgroundColor: tokens.color.divider,
+              cursor: "col-resize",
+            }}
+          />
+          <div style={{ flex: 1, minWidth: 0 }}>
+            <DataGridPro
+              {...sharedGridProps}
+              columns={rightColumns}
+              data-testid="right-grid"
+            />
+          </div>
         </div>
       </div>
     </div>

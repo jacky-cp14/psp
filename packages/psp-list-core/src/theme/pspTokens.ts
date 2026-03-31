@@ -9,8 +9,8 @@ export const tokens = {
     header: {
       gradientTop: "#F8F8F8",
       gradientBottom: "#CBCBCB",
-      borderBottom: "#bdbdbd",
-      text: "#790000",
+      borderBottom: "#535353",
+      text: "#800000",
     },
     cell: {
       text: "#000079",
@@ -52,6 +52,10 @@ export const tokens = {
   typography: {
     fontFamily: "Arial, sans-serif",
     fontSize: 22,
+    /** Column headers — smaller than cell text for hierarchy. */
+    headerFontSize: 22,
+    /** Column header row height (px). Keep in sync with `DualGrid` scrollOffset (1px border + this). */
+    headerRowHeight: 30,
     lineHeight: "120%",
   },
 } as const;

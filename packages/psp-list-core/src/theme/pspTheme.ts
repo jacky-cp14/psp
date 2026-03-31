@@ -54,29 +54,43 @@ export const pspTheme = createTheme({
       },
     },
     MuiDataGrid: {
+      defaultProps: {
+        /** Matches `tokens.typography.headerRowHeight` — grid applies this as inline header cell height. */
+        headerHeight: tokens.typography.headerRowHeight,
+      },
       styleOverrides: {
         root: {
           border: `1px solid ${tokens.color.border}`,
+          borderRadius: 0,
           fontFamily: tokens.typography.fontFamily,
           fontSize: `${tokens.typography.fontSize}px`,
           lineHeight: tokens.typography.lineHeight,
           "& .MuiDataGrid-withBorderColor": {
             borderColor: "transparent",
           },
+          "& .MuiDataGrid-main": {
+            overflow: "clip",
+          },
         },
         columnHeaders: {
+          position: "sticky",
+          top: 0,
+          zIndex: 4,
+          borderTopLeftRadius: 0,
+          borderTopRightRadius: 0,
           background: `linear-gradient(to bottom, ${tokens.color.header.gradientTop}, ${tokens.color.header.gradientBottom})`,
           color: tokens.color.header.text,
           fontWeight: 700,
-          fontSize: `${tokens.typography.fontSize}px`,
-          lineHeight: tokens.typography.lineHeight,
+          fontSize: `${tokens.typography.headerFontSize}px`,
+          lineHeight: 1.2,
           borderBottom: `1px solid ${tokens.color.header.borderBottom}`,
         },
         columnHeader: {
           background: "transparent",
           color: tokens.color.header.text,
           fontWeight: 700,
-          padding: "2px 8px",
+          fontSize: `${tokens.typography.headerFontSize}px`,
+          padding: "0 8px",
           display: "flex",
           alignItems: "center",
           "&:focus": { outline: "none" },
@@ -84,6 +98,7 @@ export const pspTheme = createTheme({
         },
         columnHeaderTitle: {
           fontWeight: 700,
+          fontSize: `${tokens.typography.headerFontSize}px`,
         },
         columnSeparator: {
           color: tokens.color.border,
@@ -98,6 +113,7 @@ export const pspTheme = createTheme({
         cell: {
           color: tokens.color.cell.text,
           fontSize: `${tokens.typography.fontSize}px`,
+          fontWeight: 300,
           lineHeight: tokens.typography.lineHeight,
           padding: "0 8px",
           borderBottom: "none",
@@ -108,6 +124,9 @@ export const pspTheme = createTheme({
           "&.MuiDataGrid-cell--pinnedLeft, &.MuiDataGrid-cell--pinnedRight": {
             backgroundColor: "inherit",
           },
+        },
+        cellContent: {
+          fontWeight: 300,
         },
         row: {
           border: "none",
@@ -135,17 +154,30 @@ export const pspTheme = createTheme({
           "&:hover": rowVariant(tokens.color.row.hover),
 
           // --- Active (pressed) ---
-          "&:active": rowVariant(tokens.color.row.active, tokens.color.row.activeText),
+          "&:active": rowVariant(
+            tokens.color.row.active,
+            tokens.color.row.activeText,
+          ),
 
           // --- Selected ---
           "&.Mui-selected": {
-            ...rowVariant(tokens.color.row.selected, tokens.color.row.selectedText),
-            "&:hover": rowVariant(tokens.color.row.selected, tokens.color.row.selectedText),
-            "&:active": rowVariant(tokens.color.row.selectedDark, tokens.color.row.selectedText),
+            ...rowVariant(
+              tokens.color.row.selected,
+              tokens.color.row.selectedText,
+            ),
+            "&:hover": rowVariant(
+              tokens.color.row.selected,
+              tokens.color.row.selectedText,
+            ),
+            "&:active": rowVariant(
+              tokens.color.row.selectedDark,
+              tokens.color.row.selectedText,
+            ),
           },
         },
         virtualScroller: {
           willChange: "transform",
+          marginTop: "0 !important",
         },
         footerContainer: {
           borderTop: `1px solid ${tokens.color.border}`,

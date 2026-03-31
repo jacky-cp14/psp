@@ -64,8 +64,9 @@ export function useKeyboardNavigation(config: UseKeyboardNavigationConfig) {
       if (!container) return;
       const targetTop = scrollOffset + index * rowHeight;
       const targetBottom = targetTop + rowHeight;
-      if (targetTop < container.scrollTop) {
-        container.scrollTop = targetTop;
+      const visibleTop = container.scrollTop + scrollOffset;
+      if (targetTop < visibleTop) {
+        container.scrollTop = targetTop - scrollOffset;
       } else if (targetBottom > container.scrollTop + container.clientHeight) {
         container.scrollTop = targetBottom - container.clientHeight;
       }

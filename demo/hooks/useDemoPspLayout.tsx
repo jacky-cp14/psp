@@ -8,7 +8,7 @@ export function scaleW(width: number, factor: number): number {
 }
 
 /** Mirror `DEFAULT_ROW_HEIGHT` in `DualGrid.tsx` (package does not export it). */
-const DEMO_ROW_HEIGHT_BASE = 41;
+const DEMO_ROW_HEIGHT_BASE = 38;
 
 export function frameMetrics(frameMode: FrameMode): {
   rowHeight: number;
