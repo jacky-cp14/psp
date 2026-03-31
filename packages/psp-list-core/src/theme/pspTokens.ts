@@ -30,7 +30,7 @@ export const tokens = {
       selectedText: "#ffffff",
     },
     border: "#c0c0c0",
-    divider: "#333333",
+    divider: "#aaa9",
     toolbar: {
       background: "#ececec",
       labelText: "#3c3c3c",

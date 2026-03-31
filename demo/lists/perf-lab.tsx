@@ -201,33 +201,30 @@ function Layer3(): React.ReactElement {
     scrollOffset: SCROLL_HEADER_OFFSET,
   });
 
-  const onDividerMouseDown = useCallback(
-    (e: React.MouseEvent) => {
-      e.preventDefault();
-      draggingRef.current = true;
-      const container = scrollRef.current;
-      if (!container) return;
+  const onDividerMouseDown = useCallback((e: React.MouseEvent) => {
+    e.preventDefault();
+    draggingRef.current = true;
+    const container = scrollRef.current;
+    if (!container) return;
 
-      const onMouseMove = (ev: MouseEvent) => {
-        if (!draggingRef.current) return;
-        const rect = container.getBoundingClientRect();
-        const pct = ((ev.clientX - rect.left) / rect.width) * 100;
-        setLeftPct(Math.min(80, Math.max(10, pct)));
-      };
-      const onMouseUp = () => {
-        draggingRef.current = false;
-        document.removeEventListener("mousemove", onMouseMove);
-        document.removeEventListener("mouseup", onMouseUp);
-        document.body.style.cursor = "";
-        document.body.style.userSelect = "";
-      };
-      document.addEventListener("mousemove", onMouseMove);
-      document.addEventListener("mouseup", onMouseUp);
-      document.body.style.cursor = "col-resize";
-      document.body.style.userSelect = "none";
-    },
-    [],
-  );
+    const onMouseMove = (ev: MouseEvent) => {
+      if (!draggingRef.current) return;
+      const rect = container.getBoundingClientRect();
+      const pct = ((ev.clientX - rect.left) / rect.width) * 100;
+      setLeftPct(Math.min(80, Math.max(10, pct)));
+    };
+    const onMouseUp = () => {
+      draggingRef.current = false;
+      document.removeEventListener("mousemove", onMouseMove);
+      document.removeEventListener("mouseup", onMouseUp);
+      document.body.style.cursor = "";
+      document.body.style.userSelect = "";
+    };
+    document.addEventListener("mousemove", onMouseMove);
+    document.addEventListener("mouseup", onMouseUp);
+    document.body.style.cursor = "col-resize";
+    document.body.style.userSelect = "none";
+  }, []);
 
   const selectionModel = selectedId ? [selectedId] : [];
   const sharedProps = {
@@ -267,7 +264,7 @@ function Layer3(): React.ReactElement {
           <div
             onMouseDown={onDividerMouseDown}
             style={{
-              width: 5.5,
+              width: 1.5,
               flexShrink: 0,
               backgroundColor: tokens.color.divider,
               cursor: "col-resize",

@@ -102,9 +102,7 @@ export const pspTheme = createTheme({
           fontSize: `${tokens.typography.headerFontSize}px`,
         },
         columnSeparator: {
-          /** Line is drawn on `columnHeader` borderRight; keep handle transparent until hover. */
-          color: "transparent",
-          "&:hover": { color: tokens.color.header.borderRight },
+          opacity: "0 !important",
         },
         menuIconButton: {
           display: "none",
