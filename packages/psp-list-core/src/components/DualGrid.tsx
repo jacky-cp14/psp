@@ -10,7 +10,7 @@ import type { GridColDef, GridRowParams } from "@mui/x-data-grid-pro";
 import { usePspList } from "../context/PspListContext";
 import { useKeyboardNavigation } from "../hooks/useKeyboardNavigation";
 import type { RowColorScheme } from "../utils/row-styling";
-import { getRowClass } from "../utils/row-styling";
+import { getRowClass, getStripeGutterLayerStyle } from "../utils/row-styling";
 import { tokens } from "../theme/pspTokens";
 
 /** Default row height when `rowHeight` is omitted. Keep in sync with demo `DEMO_ROW_HEIGHT_BASE`. */
@@ -272,6 +272,12 @@ export function DualGrid({
 
   const contentMinHeight = rows.length * rowHeight;
 
+  const stripeGutterStyle = getStripeGutterLayerStyle(
+    colorScheme,
+    rowHeight,
+    SCROLL_HEADER_OFFSET,
+  );
+
   return (
     <div
       style={{
@@ -302,8 +308,24 @@ export function DualGrid({
             flexDirection: "row",
           }}
         >
-          <div style={{ width: `${leftPct}%`, minWidth: 0 }}>
-            <div ref={leftGridHostRef}>
+          <div
+            style={{
+              width: `${leftPct}%`,
+              minWidth: 0,
+              position: "relative",
+            }}
+          >
+            {stripeGutterStyle ? (
+              <div aria-hidden style={stripeGutterStyle} />
+            ) : null}
+            <div
+              ref={leftGridHostRef}
+              style={
+                stripeGutterStyle
+                  ? { position: "relative", zIndex: 1 }
+                  : undefined
+              }
+            >
               <DataGridPro
                 {...sharedGridProps}
                 columns={leftColumns}
@@ -320,8 +342,24 @@ export function DualGrid({
               cursor: "col-resize",
             }}
           />
-          <div style={{ flex: 1, minWidth: 0 }}>
-            <div ref={rightGridHostRef}>
+          <div
+            style={{
+              flex: 1,
+              minWidth: 0,
+              position: "relative",
+            }}
+          >
+            {stripeGutterStyle ? (
+              <div aria-hidden style={stripeGutterStyle} />
+            ) : null}
+            <div
+              ref={rightGridHostRef}
+              style={
+                stripeGutterStyle
+                  ? { position: "relative", zIndex: 1 }
+                  : undefined
+              }
+            >
               <DataGridPro
                 {...sharedGridProps}
                 columns={rightColumns}

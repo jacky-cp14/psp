@@ -5,6 +5,7 @@
  * the legacy psp_* config parameters can use `resolveColorScheme()` to
  * map them to a scheme value.
  */
+import type { CSSProperties } from 'react';
 import { tokens } from '../theme/pspTokens';
 
 /**
@@ -90,4 +91,50 @@ export function getRowClass(index: number, scheme: RowColorScheme | undefined): 
   if (!scheme || scheme === 'none') return '';
   const [even, odd] = SCHEME_CLASSES[scheme];
   return index % 2 === 0 ? even : odd;
+}
+
+/** Even / odd background hex for striping (matches `pspTheme` row rules). */
+function getStripeColors(scheme: RowColorScheme): readonly [string, string] | undefined {
+  switch (scheme) {
+    case 'yellow':
+      return [tokens.color.row.yellow.even, tokens.color.row.yellow.odd];
+    case 'gray':
+      return [tokens.color.row.gray.even, tokens.color.row.gray.odd];
+    case 'blue':
+      return [tokens.color.row.blue.even, tokens.color.row.blue.odd];
+    case 'ward-highlight':
+      return [tokens.color.row.ndw.base, tokens.color.row.ndw.base];
+    case 'ward-highlight-alt':
+      return [tokens.color.row.ndw.base, tokens.color.row.ndw.alt];
+    default:
+      return undefined;
+  }
+}
+
+/**
+ * Absolutely positioned layer (place inside `position: relative` column host).
+ * Starts below the grid header so the first band aligns with row index 0 — no
+ * `background-position` phase math. `headerOffsetPx` must match DualGrid’s
+ * `SCROLL_HEADER_OFFSET` (top border + header row height).
+ */
+export function getStripeGutterLayerStyle(
+  scheme: RowColorScheme,
+  rowHeight: number,
+  headerOffsetPx: number,
+): CSSProperties | undefined {
+  const pair = getStripeColors(scheme);
+  if (!pair) return undefined;
+  const [even, odd] = pair;
+  const period = 2 * rowHeight;
+  return {
+    position: 'absolute',
+    left: 0,
+    right: 0,
+    top: headerOffsetPx,
+    bottom: 0,
+    zIndex: 0,
+    pointerEvents: 'none',
+    backgroundImage: `repeating-linear-gradient(to bottom, ${even} 0, ${even} ${rowHeight}px, ${odd} ${rowHeight}px, ${odd} ${period}px)`,
+    backgroundRepeat: 'repeat-y',
+  };
 }
