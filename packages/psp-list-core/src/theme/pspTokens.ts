@@ -10,7 +10,8 @@ export const tokens = {
       gradientTop: "#F8F8F8",
       gradientBottom: "#CBCBCB",
       /** Header row bottom band and vertical rules between header cells. */
-      borderRight: "#434343",
+      borderRight: "#aaa9",
+      borderBottom: "#aaa",
       text: "#800000",
     },
     cell: {

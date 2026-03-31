@@ -125,9 +125,7 @@ export function DualGrid({
 
       let syncingFromBar = false;
       let syncingFromGrid = false;
-      let observedVirtualContent: HTMLElement | null = null;
-      let frame1 = 0;
-      let frame2 = 0;
+      let deferredSyncTimer = 0;
 
       const syncWidths = () => {
         const scrollWidth = gridScroller.scrollWidth;
@@ -137,19 +135,6 @@ export function DualGrid({
         if (!syncingFromGrid) {
           bar.scrollLeft = gridScroller.scrollLeft;
         }
-      };
-
-      const observeVirtualContent = () => {
-        const virtualContent = gridScroller.querySelector<HTMLElement>(
-          ".MuiDataGrid-virtualScrollerContent",
-        );
-        if (!virtualContent || virtualContent === observedVirtualContent)
-          return;
-        if (observedVirtualContent) {
-          resizeObserver.unobserve(observedVirtualContent);
-        }
-        observedVirtualContent = virtualContent;
-        resizeObserver.observe(observedVirtualContent);
       };
 
       const onBarScroll = () => {
@@ -173,34 +158,14 @@ export function DualGrid({
         syncWidths();
       });
       resizeObserver.observe(gridScroller);
-      observeVirtualContent();
-
-      const mutationObserver = new MutationObserver(() => {
-        observeVirtualContent();
-        syncWidths();
-      });
-      mutationObserver.observe(gridScroller, {
-        childList: true,
-        subtree: true,
-      });
 
       syncWidths();
-      // Some browsers render DataGrid internals on subsequent frames.
-      frame1 = window.requestAnimationFrame(() => {
-        observeVirtualContent();
-        syncWidths();
-        frame2 = window.requestAnimationFrame(() => {
-          observeVirtualContent();
-          syncWidths();
-        });
-      });
+      deferredSyncTimer = window.setTimeout(syncWidths, 0);
 
       return () => {
         bar.removeEventListener("scroll", onBarScroll);
         gridScroller.removeEventListener("scroll", onGridScroll);
-        mutationObserver.disconnect();
-        if (frame1) window.cancelAnimationFrame(frame1);
-        if (frame2) window.cancelAnimationFrame(frame2);
+        if (deferredSyncTimer) window.clearTimeout(deferredSyncTimer);
         resizeObserver.disconnect();
       };
     };

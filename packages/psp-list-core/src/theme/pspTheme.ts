@@ -83,7 +83,7 @@ export const pspTheme = createTheme({
           fontWeight: 700,
           fontSize: `${tokens.typography.headerFontSize}px`,
           lineHeight: 1.2,
-          borderBottom: `1.5px solid ${tokens.color.header.borderRight}`,
+          borderBottom: `1.5px solid ${tokens.color.header.borderBottom}`,
         },
         columnHeader: {
           background: "transparent",
