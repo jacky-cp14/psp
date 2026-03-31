@@ -116,22 +116,28 @@ function getStripeColors(scheme: RowColorScheme): readonly [string, string] | un
  * Starts below the grid header so the first band aligns with row index 0 — no
  * `background-position` phase math. `headerOffsetPx` must match DualGrid’s
  * `SCROLL_HEADER_OFFSET` (top border + header row height).
+ *
+ * Height is exactly `rowCount * rowHeight` so only the data band is striped;
+ * the column host should use a solid fill (see DualGrid `containerFillBg`) for
+ * empty space below.
  */
 export function getStripeGutterLayerStyle(
   scheme: RowColorScheme,
   rowHeight: number,
   headerOffsetPx: number,
+  rowCount: number,
 ): CSSProperties | undefined {
   const pair = getStripeColors(scheme);
-  if (!pair) return undefined;
+  if (!pair || rowCount <= 0) return undefined;
   const [even, odd] = pair;
   const period = 2 * rowHeight;
+  const dataBandHeight = rowCount * rowHeight;
   return {
     position: 'absolute',
     left: 0,
     right: 0,
     top: headerOffsetPx,
-    bottom: 0,
+    height: dataBandHeight,
     zIndex: 0,
     pointerEvents: 'none',
     backgroundImage: `repeating-linear-gradient(to bottom, ${even} 0, ${even} ${rowHeight}px, ${odd} ${rowHeight}px, ${odd} ${period}px)`,

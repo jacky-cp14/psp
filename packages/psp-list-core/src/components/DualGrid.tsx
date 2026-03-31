@@ -272,10 +272,30 @@ export function DualGrid({
 
   const contentMinHeight = rows.length * rowHeight;
 
+  const containerFillBg = (() => {
+    switch (colorScheme) {
+      case "yellow":
+        return tokens.color.row.yellow.odd;
+      case "gray":
+        return tokens.color.row.gray.odd;
+      case "blue":
+        return tokens.color.row.blue.odd;
+      case "ward-highlight":
+        return tokens.color.row.ndw.base;
+      case "ward-highlight-alt":
+        return tokens.color.row.ndw.alt;
+      case "none":
+        return tokens.color.outer;
+      default:
+        return tokens.color.row.gray.odd;
+    }
+  })();
+
   const stripeGutterStyle = getStripeGutterLayerStyle(
     colorScheme,
     rowHeight,
     SCROLL_HEADER_OFFSET,
+    rows.length,
   );
 
   return (
@@ -296,6 +316,7 @@ export function DualGrid({
           flex: 1,
           minHeight: 0,
           outline: "none",
+          backgroundColor: containerFillBg,
         }}
         tabIndex={0}
         onKeyDown={handleKeyDown}
@@ -303,9 +324,10 @@ export function DualGrid({
       >
         <div
           style={{
-            minHeight: contentMinHeight,
+            minHeight: `max(${contentMinHeight}px, 100%)`,
             display: "flex",
             flexDirection: "row",
+            alignItems: "stretch",
           }}
         >
           <div
@@ -313,6 +335,7 @@ export function DualGrid({
               width: `${leftPct}%`,
               minWidth: 0,
               position: "relative",
+              backgroundColor: containerFillBg,
             }}
           >
             {stripeGutterStyle ? (
@@ -347,6 +370,7 @@ export function DualGrid({
               flex: 1,
               minWidth: 0,
               position: "relative",
+              backgroundColor: containerFillBg,
             }}
           >
             {stripeGutterStyle ? (
