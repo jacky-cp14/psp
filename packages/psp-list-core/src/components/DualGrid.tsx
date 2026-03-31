@@ -6,6 +6,10 @@ import { usePspList } from "../context/PspListContext";
 import { useKeyboardNavigation } from "../hooks/useKeyboardNavigation";
 import type { RowColorScheme } from "../utils/row-styling";
 import { getRowClass } from "../utils/row-styling";
+import { tokens } from "../theme/pspTokens";
+
+/** Default row height when `rowHeight` is omitted. Keep in sync with demo `DEMO_ROW_HEIGHT_BASE`. */
+const DEFAULT_ROW_HEIGHT = 41;
 
 export interface DualGridProps {
   leftColumns: GridColDef[];
@@ -22,8 +26,6 @@ export interface DualGridProps {
   onRowDoubleClick?: () => void;
 }
 
-const ROW_HEIGHT = 28;
-
 /**
  * Dual DataGridPro with shared vertical scroll, selection sync, and keyboard nav.
  * Left grid = patient identifiers, Right grid = clinical details.
@@ -32,8 +34,8 @@ export function DualGrid({
   leftColumns,
   rightColumns,
   defaultSplit = 35,
-  rowHeight = ROW_HEIGHT,
-  colorScheme = 'gray',
+  rowHeight = DEFAULT_ROW_HEIGHT,
+  colorScheme = "gray",
   getRowClassName: customGetRowClassName,
   onRowDoubleClick,
 }: DualGridProps): React.ReactElement {
@@ -165,8 +167,8 @@ export function DualGrid({
             </Panel>
             <PanelResizeHandle
               style={{
-                width: 4,
-                backgroundColor: "#e0e0e0",
+                width: 5.5,
+                backgroundColor: tokens.color.divider,
                 cursor: "col-resize",
               }}
             />

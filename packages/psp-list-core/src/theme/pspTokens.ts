@@ -29,7 +29,7 @@ export const tokens = {
       selectedText: "#ffffff",
     },
     border: "#c0c0c0",
-    divider: "#D5D6D8",
+    divider: "#333333",
     toolbar: {
       background: "#ececec",
       labelText: "#3c3c3c",
@@ -51,7 +51,7 @@ export const tokens = {
   },
   typography: {
     fontFamily: "Arial, sans-serif",
-    fontSize: 14,
+    fontSize: 22,
     lineHeight: "120%",
   },
 } as const;

@@ -12,8 +12,8 @@ import { create } from "zustand";
 /** Display language — `'en'` (English) | `'zh'` (Chinese) */
 export type LangMode = "en" | "zh";
 
-/** Layout width — `'expand'` (full-width) | `'compact'` (narrow) */
-export type FrameMode = "expand" | "compact";
+/** Layout width — `'expanded'` (full-width) | `'reduced'` (narrow) */
+export type FrameMode = "expanded" | "reduced";
 
 export interface PspGlobalState {
   langMode: LangMode;
@@ -50,7 +50,7 @@ export type PspGlobalStore = PspGlobalState & PspGlobalActions;
 
 export const usePspGlobal = create<PspGlobalStore>()((set) => ({
   langMode: "en",
-  frameMode: "expand",
+  frameMode: "expanded",
   defaultWard: "",
   currentWard: "",
 
@@ -59,7 +59,7 @@ export const usePspGlobal = create<PspGlobalStore>()((set) => ({
     set((s) => ({ langMode: s.langMode === "en" ? "zh" : "en" })),
   toggleFrame: () =>
     set((s) => ({
-      frameMode: s.frameMode === "expand" ? "compact" : "expand",
+      frameMode: s.frameMode === "expanded" ? "reduced" : "expanded",
     })),
   setDefaultWard: (ward) => set({ defaultWard: ward, currentWard: ward }),
   setCurrentWard: (ward) => set({ currentWard: ward }),

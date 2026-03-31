@@ -100,7 +100,7 @@ export function App(): React.ReactElement {
             <button
               type="button"
               onClick={() => toggleFrame()}
-              title="Toggle expand vs compact row height and column widths"
+              title="Toggle expanded vs reduced row height and column widths"
               style={{
                 padding: '4px 10px',
                 backgroundColor: '#fff',
@@ -111,7 +111,7 @@ export function App(): React.ReactElement {
                 fontSize: 12,
               }}
             >
-              {frameMode === 'expand' ? 'Compact' : 'Expand'}
+              {frameMode === 'expanded' ? 'Reduce' : 'Expand'}
             </button>
             <span style={{ color: '#757575', fontSize: 11 }}>
               {langMode === 'en' ? 'EN' : 'ZH'} · {frameMode}

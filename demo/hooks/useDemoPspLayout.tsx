@@ -1,21 +1,32 @@
-import { useMemo } from 'react';
-import type { GridColDef, GridRenderCellParams } from '@mui/x-data-grid-pro';
-import { usePspGlobal } from '@psp/core';
-import type { FrameMode, LangMode } from '@psp/core';
+import { useMemo } from "react";
+import type { GridColDef, GridRenderCellParams } from "@mui/x-data-grid-pro";
+import { usePspGlobal } from "@psp/core";
+import type { FrameMode, LangMode } from "@psp/core";
 
 export function scaleW(width: number, factor: number): number {
   return Math.max(48, Math.round(width * factor));
 }
+
+/** Mirror `DEFAULT_ROW_HEIGHT` in `DualGrid.tsx` (package does not export it). */
+const DEMO_ROW_HEIGHT_BASE = 41;
 
 export function frameMetrics(frameMode: FrameMode): {
   rowHeight: number;
   columnScale: number;
   defaultSplit: number;
 } {
-  if (frameMode === 'expand') {
-    return { rowHeight: 34, columnScale: 1.1, defaultSplit: 38 };
+  if (frameMode === "expanded") {
+    return {
+      rowHeight: DEMO_ROW_HEIGHT_BASE + 3,
+      columnScale: 1.1,
+      defaultSplit: 38,
+    };
   }
-  return { rowHeight: 24, columnScale: 0.9, defaultSplit: 32 };
+  return {
+    rowHeight: DEMO_ROW_HEIGHT_BASE,
+    columnScale: 0.9,
+    defaultSplit: 32,
+  };
 }
 
 export function useDemoPspLayout(): {
@@ -38,21 +49,26 @@ const EN_NAME_MIN_BASE = 120;
 const ZH_NAME_WIDTH_BASE = 160;
 
 /** English vs Chinese name columns (scaled). English name min width is 4× in EN mode. */
-export function namePairColumns(factor: number, langMode: LangMode): { en: GridColDef; zh: GridColDef } {
-  const enMinBase = langMode === 'en' ? EN_NAME_MIN_BASE * 4 : EN_NAME_MIN_BASE;
+export function namePairColumns(
+  factor: number,
+  langMode: LangMode,
+): { en: GridColDef; zh: GridColDef } {
+  const enMinBase = langMode === "en" ? EN_NAME_MIN_BASE * 4 : EN_NAME_MIN_BASE;
   return {
     en: {
-      field: 'name',
-      headerName: 'English Name',
+      field: "name",
+      headerName: "English Name",
       flex: 1,
       minWidth: scaleW(enMinBase, factor),
       renderCell: (params: GridRenderCellParams) => (
-        <span style={{ fontWeight: 700 }}>{params.value}</span>
+        <span style={{ fontWeight: 700, textTransform: "uppercase" }}>
+          {params.value}
+        </span>
       ),
     },
     zh: {
-      field: 'chineseName',
-      headerName: 'Chinese Name',
+      field: "chineseName",
+      headerName: "Chinese Name",
       width: scaleW(ZH_NAME_WIDTH_BASE, factor),
     },
   };
@@ -73,28 +89,31 @@ export function orderLeadSexAgeEnZh(
   suffix: GridColDef[] = [],
 ): GridColDef[] {
   const sexAge: GridColDef = {
-    field: 'sexAge',
-    headerName: 'Sex/Age',
+    field: "sexAge",
+    headerName: "Sex/Age",
     width: scaleW(SEX_AGE_BASE_WIDTH, factor),
   };
   const { en, zh } = namePairColumns(factor, langMode);
-  if (langMode === 'zh') {
+  if (langMode === "zh") {
     return [...prefix, leadCol, zh, sexAge, en, ...suffix];
   }
   return [...prefix, leadCol, sexAge, en, zh, ...suffix];
 }
 
 /** Scale numeric width / minWidth / maxWidth on a column template. */
-export function scaleGridColumns(cols: GridColDef[], factor: number): GridColDef[] {
+export function scaleGridColumns(
+  cols: GridColDef[],
+  factor: number,
+): GridColDef[] {
   return cols.map((col) => {
     const next: GridColDef = { ...col };
-    if (typeof col.width === 'number') {
+    if (typeof col.width === "number") {
       next.width = scaleW(col.width, factor);
     }
-    if (typeof col.minWidth === 'number') {
+    if (typeof col.minWidth === "number") {
       next.minWidth = scaleW(col.minWidth, factor);
     }
-    if (typeof col.maxWidth === 'number') {
+    if (typeof col.maxWidth === "number") {
       next.maxWidth = scaleW(col.maxWidth, factor);
     }
     return next;

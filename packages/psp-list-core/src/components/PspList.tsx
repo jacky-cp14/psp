@@ -28,7 +28,7 @@ export interface PspListProps<T extends { id: string } = { id: string }> {
   onPatientSelect?: (patient: T) => void;
   /** Initial left/right panel split percentage. */
   defaultSplit?: number;
-  /** Row height in px (default 28). */
+  /** Row height in px. Omit for the default in `DualGrid` (not exported). */
   rowHeight?: number;
   /** Alternating row color scheme (default 'gray'). */
   colorScheme?: RowColorScheme;

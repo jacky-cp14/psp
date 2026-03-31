@@ -187,7 +187,7 @@ Add the field to `PspGlobalState` in `packages/psp-list-core/src/store/pspGlobal
 
 ### Customizing appearance
 
-Row height (default 28px):
+Row height (default 41px):
 
 ```tsx
 <PspList rowHeight={36} {...rest} />
@@ -324,7 +324,7 @@ SortOption, SortKey, SortDirection, SortComparePreset, SortCompare
 | `defaultSortIndex` | `number \| null` | `null` | Initial sort preset index. `null` preserves server order. |
 | `onPatientSelect` | `(patient: T) => void` | — | Optional local callback on double-click or Enter. The event bus is always notified regardless. |
 | `defaultSplit` | `number` | `35` | Left panel width (%). |
-| `rowHeight` | `number` | `28` | Row height in px. |
+| `rowHeight` | `number` | `41` | Row height in px. |
 | `colorScheme` | `RowColorScheme` | `'gray'` | Alternating row color scheme. |
 | `getRowClassName` | `(params: GridRowParams) => string` | — | Additional row CSS classes. |
 | `pageSize` | `number` | `12` | Rows per PgUp/PgDn jump. |
@@ -376,7 +376,7 @@ const store = usePspGlobal();
 | State | Type | Default | Description |
 |-------|------|---------|-------------|
 | `langMode` | `'en' \| 'zh'` | `'en'` | Display language. |
-| `frameMode` | `'expand' \| 'compact'` | `'expand'` | Layout width. |
+| `frameMode` | `'expanded' \| 'reduced'` | `'expanded'` | Layout width. |
 | `defaultWard` | `string` | `''` | User's login ward, set once at init. |
 | `currentWard` | `string` | `''` | Active ward selection, shared across all lists. |
 
@@ -384,7 +384,7 @@ const store = usePspGlobal();
 |--------|-------------|
 | `setPspState(patch)` | Merge partial state. |
 | `toggleLang()` | Toggle `langMode` between `'en'` and `'zh'`. |
-| `toggleFrame()` | Toggle `frameMode` between `'expand'` and `'compact'`. |
+| `toggleFrame()` | Toggle `frameMode` between `'expanded'` and `'reduced'`. |
 | `setDefaultWard(ward)` | Set `defaultWard` and reset `currentWard` to match. Called once by the consuming app at init. |
 | `setCurrentWard(ward)` | Update `currentWard`. Called by list ward combo on select. |
 
