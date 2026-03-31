@@ -50,6 +50,12 @@ export function DualGrid({
   const { rows, selectedRowId, setSelectedRowId, sortModel, setSortModel } =
     usePspList();
   const scrollContainerRef = useRef<HTMLDivElement>(null);
+  const leftGridHostRef = useRef<HTMLDivElement>(null);
+  const rightGridHostRef = useRef<HTMLDivElement>(null);
+  const leftBarRef = useRef<HTMLDivElement>(null);
+  const rightBarRef = useRef<HTMLDivElement>(null);
+  const leftBarContentRef = useRef<HTMLDivElement>(null);
+  const rightBarContentRef = useRef<HTMLDivElement>(null);
   const [leftPct, setLeftPct] = useState(defaultSplit);
   const draggingRef = useRef(false);
 
@@ -101,33 +107,104 @@ export function DualGrid({
     return () => container.removeEventListener("mousedown", onMouseDown);
   }, [highlightRowVisually]);
 
-  const onDividerMouseDown = useCallback(
-    (e: React.MouseEvent) => {
-      e.preventDefault();
-      draggingRef.current = true;
-      const container = scrollContainerRef.current;
-      if (!container) return;
+  useEffect(() => {
+    const syncPanelScroll = (
+      hostRef: React.RefObject<HTMLDivElement>,
+      barRef: React.RefObject<HTMLDivElement>,
+      barContentRef: React.RefObject<HTMLDivElement>,
+    ) => {
+      const host = hostRef.current;
+      const bar = barRef.current;
+      const barContent = barContentRef.current;
+      if (!host || !bar || !barContent) return () => {};
 
-      const onMouseMove = (ev: MouseEvent) => {
-        if (!draggingRef.current) return;
-        const rect = container.getBoundingClientRect();
-        const pct = ((ev.clientX - rect.left) / rect.width) * 100;
-        setLeftPct(Math.min(80, Math.max(10, pct)));
+      const gridScroller = host.querySelector<HTMLElement>(
+        ".MuiDataGrid-virtualScroller",
+      );
+      if (!gridScroller) return () => {};
+
+      let syncingFromBar = false;
+      let syncingFromGrid = false;
+
+      const syncWidths = () => {
+        const scrollWidth = gridScroller.scrollWidth;
+        const clientWidth = gridScroller.clientWidth;
+        barContent.style.width = `${scrollWidth}px`;
+        bar.style.visibility = scrollWidth > clientWidth ? "visible" : "hidden";
+        if (!syncingFromGrid) {
+          bar.scrollLeft = gridScroller.scrollLeft;
+        }
       };
-      const onMouseUp = () => {
-        draggingRef.current = false;
-        document.removeEventListener("mousemove", onMouseMove);
-        document.removeEventListener("mouseup", onMouseUp);
-        document.body.style.cursor = "";
-        document.body.style.userSelect = "";
+
+      const onBarScroll = () => {
+        if (syncingFromGrid) return;
+        syncingFromBar = true;
+        gridScroller.scrollLeft = bar.scrollLeft;
+        syncingFromBar = false;
       };
-      document.addEventListener("mousemove", onMouseMove);
-      document.addEventListener("mouseup", onMouseUp);
-      document.body.style.cursor = "col-resize";
-      document.body.style.userSelect = "none";
-    },
-    [],
-  );
+
+      const onGridScroll = () => {
+        if (syncingFromBar) return;
+        syncingFromGrid = true;
+        bar.scrollLeft = gridScroller.scrollLeft;
+        syncingFromGrid = false;
+      };
+
+      bar.addEventListener("scroll", onBarScroll, { passive: true });
+      gridScroller.addEventListener("scroll", onGridScroll, { passive: true });
+
+      const resizeObserver = new ResizeObserver(() => {
+        syncWidths();
+      });
+      resizeObserver.observe(gridScroller);
+      const virtualContent = gridScroller.querySelector<HTMLElement>(
+        ".MuiDataGrid-virtualScrollerContent",
+      );
+      if (virtualContent) resizeObserver.observe(virtualContent);
+
+      syncWidths();
+
+      return () => {
+        bar.removeEventListener("scroll", onBarScroll);
+        gridScroller.removeEventListener("scroll", onGridScroll);
+        resizeObserver.disconnect();
+      };
+    };
+
+    const cleanups = [
+      syncPanelScroll(leftGridHostRef, leftBarRef, leftBarContentRef),
+      syncPanelScroll(rightGridHostRef, rightBarRef, rightBarContentRef),
+    ];
+
+    return () => {
+      cleanups.forEach((cleanup) => cleanup());
+    };
+  }, [leftColumns, rightColumns, leftPct, rows.length, rowHeight]);
+
+  const onDividerMouseDown = useCallback((e: React.MouseEvent) => {
+    e.preventDefault();
+    draggingRef.current = true;
+    const container = scrollContainerRef.current;
+    if (!container) return;
+
+    const onMouseMove = (ev: MouseEvent) => {
+      if (!draggingRef.current) return;
+      const rect = container.getBoundingClientRect();
+      const pct = ((ev.clientX - rect.left) / rect.width) * 100;
+      setLeftPct(Math.min(80, Math.max(10, pct)));
+    };
+    const onMouseUp = () => {
+      draggingRef.current = false;
+      document.removeEventListener("mousemove", onMouseMove);
+      document.removeEventListener("mouseup", onMouseUp);
+      document.body.style.cursor = "";
+      document.body.style.userSelect = "";
+    };
+    document.addEventListener("mousemove", onMouseMove);
+    document.addEventListener("mouseup", onMouseUp);
+    document.body.style.cursor = "col-resize";
+    document.body.style.userSelect = "none";
+  }, []);
 
   const handleRowClick = useCallback(
     (params: GridRowParams) => {
@@ -181,6 +258,16 @@ export function DualGrid({
     componentsProps: {
       row: { style: { cursor: "pointer" } },
     },
+    sx: {
+      width: "100%",
+      "& .MuiDataGrid-virtualScroller": {
+        scrollbarWidth: "none",
+        msOverflowStyle: "none",
+        "&::-webkit-scrollbar": {
+          height: 0,
+        },
+      },
+    },
   };
 
   const contentMinHeight = rows.length * rowHeight;
@@ -197,7 +284,13 @@ export function DualGrid({
     >
       <div
         ref={scrollContainerRef}
-        style={{ overflowY: "auto", flex: 1, minHeight: 0, outline: "none" }}
+        style={{
+          overflowY: "auto",
+          overflowX: "hidden",
+          flex: 1,
+          minHeight: 0,
+          outline: "none",
+        }}
         tabIndex={0}
         onKeyDown={handleKeyDown}
         data-testid="dual-grid-container"
@@ -210,11 +303,13 @@ export function DualGrid({
           }}
         >
           <div style={{ width: `${leftPct}%`, minWidth: 0 }}>
-            <DataGridPro
-              {...sharedGridProps}
-              columns={leftColumns}
-              data-testid="left-grid"
-            />
+            <div ref={leftGridHostRef}>
+              <DataGridPro
+                {...sharedGridProps}
+                columns={leftColumns}
+                data-testid="left-grid"
+              />
+            </div>
           </div>
           <div
             onMouseDown={onDividerMouseDown}
@@ -226,11 +321,52 @@ export function DualGrid({
             }}
           />
           <div style={{ flex: 1, minWidth: 0 }}>
-            <DataGridPro
-              {...sharedGridProps}
-              columns={rightColumns}
-              data-testid="right-grid"
-            />
+            <div ref={rightGridHostRef}>
+              <DataGridPro
+                {...sharedGridProps}
+                columns={rightColumns}
+                data-testid="right-grid"
+              />
+            </div>
+          </div>
+        </div>
+      </div>
+      <div
+        style={{
+          display: "flex",
+          flexShrink: 0,
+          backgroundColor: tokens.color.outer,
+        }}
+      >
+        <div style={{ width: `${leftPct}%`, minWidth: 0 }}>
+          <div
+            ref={leftBarRef}
+            style={{
+              overflowX: "auto",
+              overflowY: "hidden",
+              height: 14,
+            }}
+          >
+            <div ref={leftBarContentRef} style={{ height: 1 }} />
+          </div>
+        </div>
+        <div
+          style={{
+            width: 5.5,
+            flexShrink: 0,
+            backgroundColor: tokens.color.divider,
+          }}
+        />
+        <div style={{ flex: 1, minWidth: 0 }}>
+          <div
+            ref={rightBarRef}
+            style={{
+              overflowX: "auto",
+              overflowY: "hidden",
+              height: 14,
+            }}
+          >
+            <div ref={rightBarContentRef} style={{ height: 1 }} />
           </div>
         </div>
       </div>
