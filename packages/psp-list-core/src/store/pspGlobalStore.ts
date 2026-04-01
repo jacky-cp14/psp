@@ -33,6 +33,9 @@ export interface PspGlobalState {
    * Updated when user picks a ward in the combo on any list.
    */
   currentWard: string;
+
+  /** Available plugin lists registered by federated plugins. */
+  pluginLists: { id: string; label: string }[];
 }
 
 export interface PspGlobalActions {
@@ -44,6 +47,8 @@ export interface PspGlobalActions {
   setDefaultWard: (ward: string) => void;
   /** Update the active ward (ward combo select). */
   setCurrentWard: (ward: string) => void;
+  /** Replace the full plugin list array. */
+  setPluginLists: (lists: PspGlobalState['pluginLists']) => void;
 }
 
 export type PspGlobalStore = PspGlobalState & PspGlobalActions;
@@ -53,6 +58,7 @@ export const usePspGlobal = create<PspGlobalStore>()((set) => ({
   frameMode: "expanded",
   defaultWard: "",
   currentWard: "",
+  pluginLists: [],
 
   setPspState: (patch) => set(patch),
   toggleLang: () =>
@@ -63,4 +69,5 @@ export const usePspGlobal = create<PspGlobalStore>()((set) => ({
     })),
   setDefaultWard: (ward) => set({ defaultWard: ward, currentWard: ward }),
   setCurrentWard: (ward) => set({ currentWard: ward }),
+  setPluginLists: (lists) => set({ pluginLists: lists }),
 }));
