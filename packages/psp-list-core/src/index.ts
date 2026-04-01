@@ -16,6 +16,8 @@ export { SelectionPanel } from './components/SelectionPanel';
 export type { SelectionPanelProps } from './components/SelectionPanel';
 export { PrintDialog } from './components/PrintDialog';
 export type { PrintDialogProps, PrintVariant } from './components/PrintDialog';
+export { SortSubmenuHoverZoneDebugOverlay } from './components/SortSubmenuHoverZoneDebugOverlay';
+export type { SortSubmenuHoverZoneDebugOverlayProps } from './components/SortSubmenuHoverZoneDebugOverlay';
 
 // Global store (singleton across all federated plugins)
 export { usePspGlobal } from './store';

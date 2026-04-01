@@ -12,6 +12,7 @@ import { useKeyboardNavigation } from "../../packages/psp-list-core/src/hooks/us
 import { pspTheme } from "../../packages/psp-list-core/src/theme/pspTheme";
 import { tokens } from "../../packages/psp-list-core/src/theme/pspTokens";
 import type { NormalPatientRecord } from "../types/patient-record";
+import type { DemoContextMenuProps } from "../types/demo-context-menu";
 import { cpiPatList } from "../dummyData";
 import { List0Normal } from "./list0-normal";
 import {
@@ -282,19 +283,23 @@ function Layer3(): React.ReactElement {
 /* ─── Layer 4: Full PspList compound component (context + all hooks) ─── */
 function Layer4({
   onPatientSelect,
+  onPatCountBySpecialty,
+  onPluginListSelect,
 }: {
   onPatientSelect: (p: NormalPatientRecord) => void;
-}): React.ReactElement {
+} & DemoContextMenuProps): React.ReactElement {
   return (
     <List0Normal
       params={{ hospCode: "QMH", wardCode: "WARD_A" }}
       onPatientSelect={onPatientSelect}
+      onPatCountBySpecialty={onPatCountBySpecialty}
+      onPluginListSelect={onPluginListSelect}
     />
   );
 }
 
 /* ─── PerfLab: Tab switcher across layers ─── */
-interface PerfLabProps {
+interface PerfLabProps extends DemoContextMenuProps {
   params: Record<string, string>;
   onPatientSelect: (patient: NormalPatientRecord) => void;
 }
@@ -307,7 +312,11 @@ const LAYERS = [
   { id: 4, label: "L4: Full PspList" },
 ] as const;
 
-export function PerfLab({ onPatientSelect }: PerfLabProps): React.ReactElement {
+export function PerfLab({
+  onPatientSelect,
+  onPatCountBySpecialty,
+  onPluginListSelect,
+}: PerfLabProps): React.ReactElement {
   const [layer, setLayer] = useState(0);
 
   return (
@@ -352,7 +361,13 @@ export function PerfLab({ onPatientSelect }: PerfLabProps): React.ReactElement {
         {layer === 1 && <Layer1 />}
         {layer === 2 && <Layer2 />}
         {layer === 3 && <Layer3 />}
-        {layer === 4 && <Layer4 onPatientSelect={onPatientSelect} />}
+        {layer === 4 && (
+          <Layer4
+            onPatientSelect={onPatientSelect}
+            onPatCountBySpecialty={onPatCountBySpecialty}
+            onPluginListSelect={onPluginListSelect}
+          />
+        )}
       </div>
     </div>
   );

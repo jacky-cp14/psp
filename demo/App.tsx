@@ -1,6 +1,7 @@
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { usePspGlobal } from '@psp/core';
+import { DEMO_PLUGIN_ID_TO_LIST_ID, DEMO_PLUGIN_LISTS } from './constants/demoPluginLists';
 import type { BasePatientRecord } from './types/patient-record';
 import { List0Normal } from './lists/list0-normal';
 import { ListNormalEight } from './lists/list-normal-eight';
@@ -40,9 +41,25 @@ export function App(): React.ReactElement {
   const frameMode = usePspGlobal((s) => s.frameMode);
   const toggleLang = usePspGlobal((s) => s.toggleLang);
   const toggleFrame = usePspGlobal((s) => s.toggleFrame);
+  const setPluginLists = usePspGlobal((s) => s.setPluginLists);
+
+  useEffect(() => {
+    setPluginLists([...DEMO_PLUGIN_LISTS]);
+  }, [setPluginLists]);
 
   const handlePatientSelect = (patient: BasePatientRecord) => {
     console.log('Selected patient:', patient);
+  };
+
+  const handlePatCountBySpecialty = () => {
+    console.log('Pat. Count by Specialty');
+  };
+
+  const handlePluginListSelect = (id: string) => {
+    const listId = DEMO_PLUGIN_ID_TO_LIST_ID[id];
+    if (listId !== undefined) {
+      setActiveList(listId);
+    }
   };
 
   const ActiveList = LISTS[activeList].Component;
@@ -123,6 +140,8 @@ export function App(): React.ReactElement {
             <ActiveList
               params={{ hospCode: 'QMH', wardCode: 'WARD_A' }}
               onPatientSelect={handlePatientSelect}
+              onPatCountBySpecialty={handlePatCountBySpecialty}
+              onPluginListSelect={handlePluginListSelect}
             />
           </div>
         </main>

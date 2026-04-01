@@ -3,10 +3,13 @@ import type { GridColDef, GridRenderCellParams } from '@mui/x-data-grid-pro';
 import { PspList, SelectionPanel } from '@psp/core';
 import type { SortOption } from '@psp/core';
 import type { NormalPatientRecord } from '../types/patient-record';
+import type { DemoContextMenuProps } from '../types/demo-context-menu';
 import { useListData } from '../hooks/useListData';
 import { orderLeadSexAgeEnZh, scaleGridColumns, scaleW, useDemoPspLayout } from '../hooks/useDemoPspLayout';
 
 const ACCENT_RED = '#f43440';
+
+const DEBUG_SORT_SUBMENU_HOVER_ZONE = true;
 
 const RIGHT_BASE: GridColDef[] = [
   { field: 'caseNo', headerName: 'Episode', width: 152 },
@@ -89,12 +92,17 @@ const sortOptions: SortOption[] = [
   ]},
 ];
 
-interface List0Props {
+interface List0Props extends DemoContextMenuProps {
   params: Record<string, string>;
   onPatientSelect: (patient: NormalPatientRecord) => void;
 }
 
-export function List0Normal({ params, onPatientSelect }: List0Props): React.ReactElement {
+export function List0Normal({
+  params,
+  onPatientSelect,
+  onPatCountBySpecialty,
+  onPluginListSelect,
+}: List0Props): React.ReactElement {
   const { langMode, rowHeight, columnScale, defaultSplit } = useDemoPspLayout();
 
   const { rows } = useListData<NormalPatientRecord>({
@@ -125,8 +133,11 @@ export function List0Normal({ params, onPatientSelect }: List0Props): React.Reac
         sortOptions={sortOptions}
         defaultSortIndex={1}
         onPatientSelect={onPatientSelect}
+        onPatCountBySpecialty={onPatCountBySpecialty}
+        onPluginListSelect={onPluginListSelect}
         rowHeight={rowHeight}
         defaultSplit={defaultSplit}
+        debugSortSubmenuHoverZone={DEBUG_SORT_SUBMENU_HOVER_ZONE}
       />
     </>
   );

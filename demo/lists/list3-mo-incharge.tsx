@@ -3,6 +3,7 @@ import type { GridColDef } from '@mui/x-data-grid-pro';
 import { PspList, SelectionPanel } from '@psp/core';
 import type { SortOption } from '@psp/core';
 import type { MoInChargePatientRecord } from '../types/patient-record';
+import type { DemoContextMenuProps } from '../types/demo-context-menu';
 import { useListData } from '../hooks/useListData';
 import { orderLeadSexAgeEnZh, scaleGridColumns, scaleW, useDemoPspLayout } from '../hooks/useDemoPspLayout';
 
@@ -76,12 +77,17 @@ const sortOptions: SortOption[] = [
   ]},
 ];
 
-interface List3Props {
+interface List3Props extends DemoContextMenuProps {
   params: Record<string, string>;
   onPatientSelect: (patient: MoInChargePatientRecord) => void;
 }
 
-export function List3MoInCharge({ params, onPatientSelect }: List3Props): React.ReactElement {
+export function List3MoInCharge({
+  params,
+  onPatientSelect,
+  onPatCountBySpecialty,
+  onPluginListSelect,
+}: List3Props): React.ReactElement {
   const { langMode, rowHeight, columnScale, defaultSplit } = useDemoPspLayout();
 
   const { rows } = useListData<MoInChargePatientRecord>({
@@ -111,6 +117,8 @@ export function List3MoInCharge({ params, onPatientSelect }: List3Props): React.
         defaultSortIndex={1}
         pageSize={7}
         onPatientSelect={onPatientSelect}
+        onPatCountBySpecialty={onPatCountBySpecialty}
+        onPluginListSelect={onPluginListSelect}
         rowHeight={rowHeight}
         defaultSplit={defaultSplit}
       />

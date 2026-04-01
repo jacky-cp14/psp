@@ -49,6 +49,16 @@ export const tokens = {
       lock: "#9c1407",
       lockHeader: "#828282",
     },
+    contextMenu: {
+      background: "#F5F5F5",
+      hoverBackground: "#D3E4F9",
+      shadow:
+        "0 2px 6px rgba(0, 0, 0, 0.18), 0 4px 14px rgba(0, 0, 0, 0.12)",
+      fontSize: 13,
+      itemMinHeight: 30,
+      minWidth: 240,
+      submenuMinWidth: 280,
+    },
     outer: "#d1d1d1",
   },
   typography: {

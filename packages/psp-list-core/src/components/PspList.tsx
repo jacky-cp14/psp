@@ -36,14 +36,20 @@ export interface PspListProps<T extends { id: string } = { id: string }> {
   getRowClassName?: (params: GridRowParams) => string;
   /** Page size for PgUp/PgDn (default 12). */
   pageSize?: number;
+  /** Right-click menu — "Pat. Count by Specialty". */
+  onPatCountBySpecialty?: () => void;
+  /** Right-click menu — plugin list row (ids from global `pluginLists`). */
+  onPluginListSelect?: (id: string) => void;
+  /** Dev: visualize sort submenu hover triangle. */
+  debugSortSubmenuHoverZone?: boolean;
 }
 
 /**
  * Flat, prop-driven list — mirrors MUI DataGrid's API contract:
  * data in, UI out, callbacks for interaction.
  *
- * Internally composes SortMenu (right-click context menu) and
- * DualGrid (split DataGridPro pair with keyboard nav).
+ * Internally composes SortMenu (right-click: Sort submenu, Pat. Count,
+ * plugin list from global store) and DualGrid (split DataGridPro pair with keyboard nav).
  *
  * Toolbar/title is the consumer's layout concern — use `SelectionPanel`
  * above `PspList` for the standard toolbar look.
@@ -60,6 +66,9 @@ export function PspList<T extends { id: string }>({
   colorScheme,
   getRowClassName,
   pageSize: _pageSize,
+  onPatCountBySpecialty,
+  onPluginListSelect,
+  debugSortSubmenuHoverZone,
 }: PspListProps<T>): React.ReactElement {
   const fieldCompares = useMemo(
     () => buildFieldCompareMap([...leftColumns, ...rightColumns]),
@@ -123,7 +132,12 @@ export function PspList<T extends { id: string }>({
   return (
     <ThemeProvider theme={pspTheme}>
       <PspListProvider value={contextValue}>
-        <SortMenu sortLabels={sortLabels}>
+        <SortMenu
+          sortLabels={sortLabels}
+          onPatCountBySpecialty={onPatCountBySpecialty}
+          onPluginListSelect={onPluginListSelect}
+          debugSortSubmenuHoverZone={debugSortSubmenuHoverZone}
+        >
           <DualGrid
             leftColumns={leftColumns}
             rightColumns={rightColumns}

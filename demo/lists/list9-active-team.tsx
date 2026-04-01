@@ -3,6 +3,7 @@ import type { GridColDef } from '@mui/x-data-grid-pro';
 import { PspList, SelectionPanel } from '@psp/core';
 import type { SortOption } from '@psp/core';
 import type { ActiveTeamPatientRecord } from '../types/patient-record';
+import type { DemoContextMenuProps } from '../types/demo-context-menu';
 import { useListData } from '../hooks/useListData';
 import { orderLeadSexAgeEnZh, scaleGridColumns, scaleW, useDemoPspLayout } from '../hooks/useDemoPspLayout';
 
@@ -81,12 +82,17 @@ const sortOptions: SortOption[] = [
   ]},
 ];
 
-interface List9Props {
+interface List9Props extends DemoContextMenuProps {
   params: Record<string, string>;
   onPatientSelect: (patient: ActiveTeamPatientRecord) => void;
 }
 
-export function List9ActiveTeam({ params, onPatientSelect }: List9Props): React.ReactElement {
+export function List9ActiveTeam({
+  params,
+  onPatientSelect,
+  onPatCountBySpecialty,
+  onPluginListSelect,
+}: List9Props): React.ReactElement {
   const { langMode, rowHeight, columnScale, defaultSplit } = useDemoPspLayout();
 
   const { rows } = useListData<ActiveTeamPatientRecord>({
@@ -118,6 +124,8 @@ export function List9ActiveTeam({ params, onPatientSelect }: List9Props): React.
         sortOptions={sortOptions}
         defaultSortIndex={8}
         onPatientSelect={onPatientSelect}
+        onPatCountBySpecialty={onPatCountBySpecialty}
+        onPluginListSelect={onPluginListSelect}
         rowHeight={rowHeight}
         defaultSplit={defaultSplit}
       />
